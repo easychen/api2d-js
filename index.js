@@ -89,6 +89,20 @@ export default class Api2d
         });
         return await response.json();
     }
+
+    async billing()
+    {
+        const url = this.apiBaseUrl + "/dashboard/billing/credit_grants";
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
+        const response = await fetch( url, {
+            method: "GET",
+            headers: headers
+        });
+        return await response.json();
+    }
 }
 
 
