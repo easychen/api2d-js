@@ -6,7 +6,7 @@ export default class Api2d
     constructor( key = null, apiBaseUrl=null )
     {
         this.key = key;
-        this.apiBaseUrl = apiBaseUrl || ( key?.startsWith("fk") ? "https://openai.api2d.net":"https://api.openai.com" );
+        this.apiBaseUrl = apiBaseUrl || ( key && key.startsWith("fk") ? "https://openai.api2d.net":"https://api.openai.com" );
     }
 
     // set key

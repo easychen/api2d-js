@@ -7,6 +7,8 @@ For some reason, I couldn't find a pure browser implementation of the OpenAI SDK
 ## Usage
 
 ```js
+import Api2d from 'api2d';
+
 const api = new Api2d(key, apiBaseUrl);
 
 // Chat completion
@@ -47,6 +49,8 @@ api.setApiBaseUrl( 'https://...your openai proxy address' );
 ## 使用方法
 
 ```js
+import Api2d from 'api2d';
+
 const api = new Api2d(key, apiBaseUrl);
 
 // chat 补全
