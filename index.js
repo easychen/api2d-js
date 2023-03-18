@@ -65,7 +65,7 @@ export default class Api2d
             const response = await fetch( url, {
                 method: "POST",
                 headers: headers,
-                body: JSON.stringify( restOptions )
+                body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'} )
             });
             return await response.json();
         }
