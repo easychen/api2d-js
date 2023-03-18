@@ -37,27 +37,35 @@ export default class Api2d
         // 如果是流式返回，且有回调函数
         if( restOptions.stream && onMessage )
         {
-            let chars = "";
-            // console.log( "in stream" );
-            const response = await fetchEventSource( url, {
-                method: "POST",
-                headers: {...headers, "Accept": "text/event-stream"},
-                body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'}),
-                onmessage: e => {
-                    if( e.data == '[DONE]' )
-                    {
-                        // console.log( 'DONE' );
-                        if( onEnd ) onEnd( chars );
-                        chars = "";
-                    }else
-                    {
-                        // console.log( e.data );
-                        const event = JSON.parse(e.data);
-                        if( event.choices[0].delta.content ) chars += event.choices[0].delta.content;
-                        onMessage( chars );
-                    }
-                    
-                },
+            // 返回一个 Promise
+            return new Promise( async (resolve, reject) => {
+                try {
+                    let chars = "";
+                    console.log( "in stream" );
+                    const response = await fetchEventSource( url, {
+                        method: "POST",
+                        headers: {...headers, "Accept": "text/event-stream"},
+                        body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'}),
+                        onmessage: e => {
+                            if( e.data == '[DONE]' )
+                            {
+                                // console.log( 'DONE' );
+                                if( onEnd ) onEnd( chars );
+                                resolve( chars );
+                            }else
+                            {
+                                // console.log( e.data );
+                                const event = JSON.parse(e.data);
+                                if( event.choices[0].delta.content ) chars += event.choices[0].delta.content;
+                                if(onMessage) onMessage( chars );
+                            }
+                            
+                        },
+                    });
+                } catch (error) {
+                    console.log( error );
+                    reject( error );    
+                }
             });
         }else
         {
