@@ -41,11 +41,18 @@ export default class Api2d
             return new Promise( async (resolve, reject) => {
                 try {
                     let chars = "";
-                    console.log( "in stream" );
+                    // console.log( "in stream" );
                     const response = await fetchEventSource( url, {
                         method: "POST",
                         headers: {...headers, "Accept": "text/event-stream"},
                         body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'}),
+                        async onopen( response )
+                        {
+                            if( response.status != 200 )
+                            {
+                                throw new Error( response.statusText );
+                            }   
+                        },
                         onmessage: e => {
                             if( e.data == '[DONE]' )
                             {
@@ -61,9 +68,12 @@ export default class Api2d
                             }
                             
                         },
+                        onerror: error => {
+                            throw new Error( error );
+                        }
                     });
                 } catch (error) {
-                    console.log( error );
+                    // console.log( error );
                     reject( error );    
                 }
             });
