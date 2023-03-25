@@ -3,10 +3,12 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 export default class Api2d
 {
     // 设置key和apiBaseUrl
-    constructor( key = null, apiBaseUrl=null )
+    constructor( key = null, apiBaseUrl=null, timeout = 60000 )
     {
         this.key = key;
-        this.apiBaseUrl = apiBaseUrl || ( key && key.startsWith("fk") ? "https://openai.api2d.net":"https://api.openai.com" );
+        this.apiBaseUrl = apiBaseUrl || ( key && key.startsWith("fk") ? "https://stream.api2d.net":"https://api.openai.com" );
+        this.timeout = timeout;
+        this.controller = new AbortController();
     }
 
     // set key
@@ -19,6 +21,16 @@ export default class Api2d
     setApiBaseUrl( apiBaseUrl )
     {
         this.apiBaseUrl = apiBaseUrl;
+    }
+
+    setTimeout( timeout )
+    {
+        this.timeout = parseInt(timeout)||60*1000;
+    }
+
+    abort()
+    {
+        this.controller.abort();
     }
 
     // Completion
@@ -41,8 +53,15 @@ export default class Api2d
             return new Promise( async (resolve, reject) => {
                 try {
                     let chars = "";
-                    // console.log( "in stream" );
+                    console.log( "in stream" );
+                    // 使用 fetchEventSource 发送请求
+                    const timeout_handle = setTimeout( () => {
+                        this.controller.abort();
+                        // throw new Error( "Timeout "+ this.timeout );
+                        reject( new Error( "Timeout "+ this.timeout ) );   
+                    }, this.timeout );
                     const response = await fetchEventSource( url, {
+                        signal: this.controller.signal,
                         method: "POST",
                         headers: {...headers, "Accept": "text/event-stream"},
                         body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'}),
@@ -58,6 +77,10 @@ export default class Api2d
                             {
                                 // console.log( 'DONE' );
                                 if( onEnd ) onEnd( chars );
+                                if( timeout_handle ) 
+                                {
+                                    clearTimeout( timeout_handle );
+                                }
                                 resolve( chars );
                             }else
                             {
@@ -72,8 +95,11 @@ export default class Api2d
                             throw new Error( error );
                         }
                     });
+                    
+                    // const ret = await response.json();
+
                 } catch (error) {
-                    // console.log( error );
+                    console.log( error );
                     reject( error );    
                 }
             });
@@ -81,11 +107,18 @@ export default class Api2d
         {
             // 使用 fetch 发送请求
             const response = await fetch( url, {
+                signal: this.controller.signal,
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'} )
             });
-            return await response.json();
+            const timeout_handle = setTimeout( () => {
+                this.controller.abort();
+
+            }, this.timeout );
+            const ret = await response.json();
+            clearTimeout( timeout_handle );
+            return ret;
         }
     }
 
@@ -101,11 +134,17 @@ export default class Api2d
         const {model,  ...restOptions } = options;
         // 使用 fetch 发送请求
         const response = await fetch( url, {
+            signal: this.controller.signal,
             method: "POST",
             headers: headers,
             body: JSON.stringify( {...restOptions,model:model||'text-embedding-ada-002'} )
         });
-        return await response.json();
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+        }, this.timeout );
+        const ret = await response.json();
+        clearTimeout( timeout_handle );
+        return ret;
     }
 
     async billing()
@@ -116,10 +155,16 @@ export default class Api2d
             "Authorization": "Bearer " + this.key
         };
         const response = await fetch( url, {
+            signal: this.controller.signal,
             method: "GET",
             headers: headers
         });
-        return await response.json();
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+        }, this.timeout );
+        const ret = await response.json();
+        clearTimeout( timeout_handle );
+        return ret;
     }
 }
 
