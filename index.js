@@ -73,14 +73,14 @@ export default class Api2d
                             }   
                         },
                         onmessage: e => {
+                            if( timeout_handle ) 
+                            {
+                                clearTimeout( timeout_handle );
+                            }
                             if( e.data == '[DONE]' )
                             {
                                 // console.log( 'DONE' );
                                 if( onEnd ) onEnd( chars );
-                                if( timeout_handle ) 
-                                {
-                                    clearTimeout( timeout_handle );
-                                }
                                 resolve( chars );
                             }else
                             {

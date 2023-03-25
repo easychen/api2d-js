@@ -51,7 +51,8 @@ api.setApiBaseUrl( 'https://...your openai proxy address' );
 ```js
 import Api2d from 'api2d';
 
-const api = new Api2d(key, apiBaseUrl);
+const timeout = 1000*60; // 60秒超时
+const api = new Api2d(key, apiBaseUrl, timeout);
 
 // chat 补全
 const ret = await api.completion({
@@ -80,6 +81,8 @@ console.log( ret );
 
 api.setKey( 'newkey' ); // set key
 api.setApiBaseUrl( 'https://...your openai proxy address' );
+api.setTimeout( 1000*60*5 );
+api.abort(); // 主动取消请求
 
 ```
 
