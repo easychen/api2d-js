@@ -58,7 +58,7 @@ export default class Api2d
                     const timeout_handle = setTimeout( () => {
                         this.controller.abort();
                         // throw new Error( "Timeout "+ this.timeout );
-                        reject( new Error( "Timeout "+ this.timeout ) );   
+                        reject( new Error( `[408]:Timeout by ${this.timeout} ms` ) );   z
                     }, this.timeout );
                     const response = await fetchEventSource( url, {
                         signal: this.controller.signal,
@@ -69,7 +69,7 @@ export default class Api2d
                         {
                             if( response.status != 200 )
                             {
-                                throw new Error( response.statusText );
+                                throw new Error( `[${response.status}]:${response.statusText}` );
                             }   
                         },
                         onmessage: e => {
@@ -92,7 +92,8 @@ export default class Api2d
                             
                         },
                         onerror: error => {
-                            throw new Error( error );
+                            console.log( error );
+                            throw new Error( `[500]:${error}` );
                         }
                     });
                     
