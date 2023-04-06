@@ -1,17 +1,18 @@
-中文说明见后边，以下英文由GPT3.5友情翻译。
+中文说明见后边，以下英文由GPT3.5友情翻译。感谢 [cdswyda](https://github.com/cdswyda) 的PR，已经可以在Node环境运行。
 
-# A simple pure browser SDK for Api2d and OpenAI
+# A Simple Pure Browser SDK for Api2d and OpenAI
 
-For some reason, I couldn't find a pure browser implementation of the OpenAI SDK, they were all designed for Node. So, I decided to create my own implementation that is compatible with both OpenAI and [API2d](https://api2d.com/) keys.
+For some reason, I couldn't find a pure browser OpenAI SDK, they were all implemented in Node. So I wrote one myself, which is compatible with both OpenAI and [API2d](https://api2d.com/) keys.
 
 ## Usage
 
 ```js
 import Api2d from 'api2d';
 
-const api = new Api2d(key, apiBaseUrl);
+const timeout = 1000*60; // 60 seconds timeout
+const api = new Api2d(key, apiBaseUrl, timeout);
 
-// Chat completion
+// chat completion
 const ret = await api.completion({
     model:'gpt-3.5-turbo',
     messages: [
@@ -20,9 +21,9 @@ const ret = await api.completion({
             "content":"Hello"
         }
     ],
-    stream: true, // Supports streaming, note that when stream is true, the return value is undefined
+    stream: true, // supports stream, note that when stream is true, the return value is undefined
     onMessage: (string)=> {
-        console.log( "SSE returned, the complete string received is:", string );
+        console.log( "SSE returns, here is the complete string received", string );
     },
     onEnd: (string)=> {
         console.log( "end", string );
@@ -30,7 +31,7 @@ const ret = await api.completion({
 });
 
 
-// Embeddings
+// embeddings
 const ret = await api.embeddings({
     input: "hello world"
 });
@@ -38,8 +39,38 @@ console.log( ret );
 
 api.setKey( 'newkey' ); // set key
 api.setApiBaseUrl( 'https://...your openai proxy address' );
+api.setTimeout( 1000*60*5 );
+api.abort(); // cancel the request actively
 
 ```
+
+### Example of using in Node environment
+
+```js
+const api2d = require('api2d-js/cjs/index.js');
+const forward_key = 'FK...';
+async function doit()
+{
+    const api2d_instance = new api2d(forward_key);
+    const response = await api2d_instance.completion({
+        messages: [
+            {
+                'role':'user',
+                'content':'来首唐诗',
+            }
+        ],
+        stream: true,
+        onMessage: (message) => {
+            console.log(message);
+        }
+    });
+    console.log(response);
+}
+
+doit();
+```
+
+[More examples](https://github.com/easychen/api2d-js/pull/3#issuecomment-1498753640)
 
 
 # 一个简单的纯浏览器SDK for Api2d 和 OpenAI
@@ -85,4 +116,34 @@ api.setTimeout( 1000*60*5 );
 api.abort(); // 主动取消请求
 
 ```
+
+### Node 环境使用示例
+
+```js
+const api2d = require('api2d-js/cjs/index.js');
+const forward_key = 'FK...';
+async function doit()
+{
+    const api2d_instance = new api2d(forward_key);
+    const response = await api2d_instance.completion({
+        messages: [
+            {
+                'role':'user',
+                'content':'来首唐诗',
+            }
+        ],
+        stream: true,
+        onMessage: (message) => {
+            console.log(message);
+        }
+    });
+    console.log(response);
+}
+
+doit();
+```
+
+[更多例子](https://github.com/easychen/api2d-js/pull/3#issuecomment-1498753640)
+
+
 
