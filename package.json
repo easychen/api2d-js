@@ -11,6 +11,7 @@
   "private": false,
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
+    "eventsource-parser": "^1.0.0",
     "node-fetch": "^2.6.9"
   }
 }

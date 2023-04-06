@@ -1,4 +1,4 @@
-const fetchEventSource = require('@microsoft/fetch-event-source');
+const fetchSSE = require('./fetchSSE.js');
 const fetch = require('node-fetch');
 
 module.exports = class Api2d {
@@ -53,9 +53,11 @@ module.exports = class Api2d {
                         // throw new Error( "Timeout "+ this.timeout );
                         reject(new Error(`[408]:Timeout by ${this.timeout} ms`));
                     }, this.timeout);
-                    const response = await fetchEventSource(url, {
+                    const response = await fetchSSE(url, {
                         signal: this.controller.signal,
                         method: 'POST',
+                        openWhenHidden: true,
+                        fetch: fetch,
                         headers: { ...headers, Accept: 'text/event-stream' },
                         body: JSON.stringify({ ...restOptions, model: model || 'gpt-3.5-turbo' }),
                         async onopen(response) {
@@ -63,17 +65,16 @@ module.exports = class Api2d {
                                 throw new Error(`[${response.status}]:${response.statusText}`);
                             }
                         },
-                        onmessage: (e) => {
+                        onmessage: (data) => {
                             if (timeout_handle) {
                                 clearTimeout(timeout_handle);
                             }
-                            if (e.data == '[DONE]') {
+                            if (data == '[DONE]') {
                                 // console.log( 'DONE' );
                                 if (onEnd) onEnd(chars);
                                 resolve(chars);
                             } else {
-                                // console.log( e.data );
-                                const event = JSON.parse(e.data);
+                                const event = JSON.parse(data);
                                 if (event.choices[0].delta.content) chars += event.choices[0].delta.content;
                                 if (onMessage) onMessage(chars);
                             }
@@ -82,7 +83,7 @@ module.exports = class Api2d {
                             console.log(error);
                             throw new Error(String(error)?.match(/\[(\d+)\]/)?.[1] ? error : `[500]:${error}`);
                         }
-                    });
+                    }, global.fetch || fetch);
 
                     // const ret = await response.json();
                 } catch (error) {
