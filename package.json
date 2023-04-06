@@ -2,12 +2,15 @@
   "name": "api2d",
   "version": "0.1.11",
   "description": "pure browser sdk for api2d and openai",
-  "main": "index.js",
+  "main": "cjs/index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
   "repository": "https://github.com/easychen/api2d-js",
   "author": "EasyChen",
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "@microsoft/fetch-event-source": "^2.0.1"
+    "@microsoft/fetch-event-source": "^2.0.1",
+    "node-fetch": "^2.6.9"
   }
 }
