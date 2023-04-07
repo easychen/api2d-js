@@ -44,7 +44,9 @@ export default class Api2d
             "Authorization": "Bearer " + this.key
         };
 
-        const { onMessage, onEnd, model,  ...restOptions } = options;
+        const { onMessage, onEnd, model, noCache ,  ...restOptions } = options;
+
+        if( noCache ) headers['x-api2d-no-cache'] = 1;
 
         // 如果是流式返回，且有回调函数
         if( restOptions.stream && onMessage )
