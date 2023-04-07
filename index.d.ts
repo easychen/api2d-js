@@ -17,6 +17,7 @@ declare class Api2d {
     onMessage?: (message: string) => void;
     onEnd?: (message: string) => void;
     model?: string;
+    noCache?: boolean;
     [key: string]: any;
   }): Promise<string>;
 
