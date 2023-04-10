@@ -95,7 +95,13 @@ export default class Api2d
                         },
                         onerror: error => {
                             console.log( error );
-                            throw new Error( String(error)?.match(/\[(\d+)\]/)?.[1] ? error : `[500]:${error}` );
+                            let error_string = String(error);
+                            if( error_string && error_string.match(/\[(\d+)\]/) )
+                            {
+                                const matchs = error_string.match(/\[(\d+)\]/);
+                                error_string = `[${matchs[1]}]:${error_string}`;
+                            }
+                            throw new Error( error_string );
                         }
                     });
                     
