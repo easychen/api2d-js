@@ -176,8 +176,10 @@ export default class Api2d
         return ret;
     }
 
-    async vectorSave(text, embedding, uuid = "", meta = "")
+    async vectorSave(options)
     {
+        // text, embedding, uuid = "", meta = ""
+        const { text, embedding, uuid, meta } = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/vector";
         // 拼接headers
@@ -185,6 +187,7 @@ export default class Api2d
             "Content-Type": "application/json",
             "Authorization": "Bearer " + this.key
         };
+
         // 使用 fetch 发送请求
         const response = await fetch( url, {
             signal: this.controller.signal,
@@ -192,9 +195,9 @@ export default class Api2d
             headers: headers,
             body: JSON.stringify({
                 text: text,
-                uuid: uuid,
+                uuid: uuid??"",
                 embedding: embedding,
-                meta: meta
+                meta: meta??""
               })
         });
         const timeout_handle = setTimeout( () => {
@@ -205,8 +208,9 @@ export default class Api2d
         return ret;
     }
 
-    async vectorSearch(searchable_id, embedding, topk = 1)
+    async vectorSearch(options)
     {
+        const { searchable_id, embedding, topk }  = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/vector/search";
         // 拼接headers
@@ -222,7 +226,7 @@ export default class Api2d
             body: JSON.stringify({
                 searchable_id,
                 embedding,
-                topk
+                topk:topk??1
               })
         });
         const timeout_handle = setTimeout( () => {
@@ -233,8 +237,9 @@ export default class Api2d
         return ret;
     }
 
-    async vectorDelete(uuid)
+    async vectorDelete(options)
     {
+        const { uuid } = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/vector/delete";
         // 拼接headers

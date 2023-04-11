@@ -34,10 +34,10 @@ async function vector()
         console.log("获取到向量", response.data[0].embedding );
 
         // 将向量和文本保存到数据库
-        const response2 = await api2d_instance.vectorSave(
+        const response2 = await api2d_instance.vectorSave({
             text,
-            response.data[0].embedding,
-        );
+            embedding: response.data[0].embedding,
+        });
 
         console.log(response2);
 
@@ -46,17 +46,17 @@ async function vector()
             console.log("保存成功，searchable_id="+response2.searchable_id);
 
             // 开始搜索
-            const response3 = await api2d_instance.vectorSearch(
-                response2.searchable_id,
-                response.data[0].embedding,
-                1,
-            );
+            const response3 = await api2d_instance.vectorSearch({
+                embedding: response.data[0].embedding,
+                topk: 1,
+                searchable_id: response2.searchable_id,
+            });
             console.log(response3,response3.data.Get.Text[0].text);
 
             // 删除
-            const response4 = await api2d_instance.vectorDelete(
-                response2.uuid,
-            );
+            const response4 = await api2d_instance.vectorDelete({
+                uuid: response2.uuid,
+            });
             console.log(response4);
         }
 

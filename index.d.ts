@@ -29,20 +29,24 @@ declare class Api2d {
 
   billing(): Promise<any>;
 
-  vectorSave(
+  vectorSave(options:{
     text: string,
     embedding: number[], 
     uuid?: string, 
     meta?: string
+  }
   ): Promise<any>;
 
-  vectorSearch(
+  vectorSearch(options:{
     searchable_id: string,
     embedding: number[], // 1536维的向量
     topk?: number
+  }
   ): Promise<any>;
 
-  vectorDelete(uuid: string): Promise<any>;
+  vectorDelete(options:{
+    uuid: string
+  }): Promise<any>;
   vectorDeleteAll(): Promise<any>;
 }
 
