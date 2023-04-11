@@ -1,7 +1,7 @@
 const api2d = require('../cjs/index.js');
 // 从环境变量取得key
 const forward_key = process.env.FORWARD_KEY||"FK...";
-async function doit()
+async function chat()
 {
     const api2d_instance = new api2d(forward_key);
     const response = await api2d_instance.completion({
@@ -20,4 +20,50 @@ async function doit()
     console.log(response);
 }
 
-doit();
+async function vector()
+{
+    const api2d_instance = new api2d(forward_key);
+    const text = '一纸淋漓漫点方圆透,记我 长风万里绕指未相勾,形生意成 此意 逍遥不游';
+    // 调用 embedding 接口，将文本转为向量
+    const response = await api2d_instance.embeddings({
+        input: text,
+    });
+    console.log(response);
+    if( response.data[0].embedding )
+    {
+        console.log("获取到向量", response.data[0].embedding );
+
+        // 将向量和文本保存到数据库
+        const response2 = await api2d_instance.vectorSave(
+            text,
+            response.data[0].embedding,
+        );
+
+        console.log(response2);
+
+        if( response2.searchable_id )
+        {
+            console.log("保存成功，searchable_id="+response2.searchable_id);
+
+            // 开始搜索
+            const response3 = await api2d_instance.vectorSearch(
+                response2.searchable_id,
+                response.data[0].embedding,
+                1,
+            );
+            console.log(response3,response3.data.Get.Text[0].text);
+
+            // 删除
+            const response4 = await api2d_instance.vectorDelete(
+                response2.uuid,
+            );
+            console.log(response4);
+        }
+
+    }
+    
+    
+}
+
+// chat();
+vector();

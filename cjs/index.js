@@ -5,7 +5,7 @@ module.exports = class Api2d {
     // 设置key和apiBaseUrl
     constructor(key = null, apiBaseUrl = null, timeout = 60000) {
         this.key = key;
-        this.apiBaseUrl = apiBaseUrl || (key && key.startsWith('fk') ? 'https://stream.api2d.net' : 'https://api.openai.com');
+        this.apiBaseUrl = apiBaseUrl || (key && key.startsWith('fk') ? 'https://openai.api2d.net' : 'https://api.openai.com');
         this.timeout = timeout;
         this.controller = new AbortController();
     }
@@ -157,5 +157,113 @@ module.exports = class Api2d {
         const ret = await response.json();
         clearTimeout(timeout_handle);
         return ret;
+    }
+
+    async vectorSave(text, embedding, uuid = "", meta = "")
+    {
+        // 拼接目标URL
+        const url = this.apiBaseUrl + "/vector";
+        // 拼接headers
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
+
+        // 使用 fetch 发送请求
+        const response = await fetch( url, {
+            signal: this.controller.signal,
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+                text: text,
+                uuid: uuid,
+                embedding: embedding,
+                meta: meta
+              })
+        });
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+        }, this.timeout );
+        const ret = await response.json();
+        clearTimeout( timeout_handle );
+        return ret;
+    }
+
+    async vectorSearch(searchable_id, embedding, topk = 1)
+    {
+        // 拼接目标URL
+        const url = this.apiBaseUrl + "/vector/search";
+        // 拼接headers
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
+        // 使用 fetch 发送请求
+        const response = await fetch( url, {
+            signal: this.controller.signal,
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+                searchable_id,
+                embedding,
+                topk
+              })
+        });
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+        }, this.timeout );
+        const ret = await response.json();
+        clearTimeout( timeout_handle );
+        return ret;
+    }
+
+    async vectorDelete(uuid)
+    {
+        // 拼接目标URL
+        const url = this.apiBaseUrl + "/vector/delete";
+        // 拼接headers
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
+        // 使用 fetch 发送请求
+        const response = await fetch( url, {
+            signal: this.controller.signal,
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+                uuid
+              })
+        });
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+        }, this.timeout );
+        const ret = await response.json();
+        clearTimeout( timeout_handle );
+        return ret;    
+    }
+
+    async vectorDeleteAll()
+    {
+        // 拼接目标URL
+        const url = this.apiBaseUrl + "/vector/delete-all";
+        // 拼接headers
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
+        // 使用 fetch 发送请求
+        const response = await fetch( url, {
+            signal: this.controller.signal,
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({})
+        });
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+        }, this.timeout );
+        const ret = await response.json();
+        clearTimeout( timeout_handle );
+        return ret;    
     }
 };
