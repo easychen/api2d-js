@@ -17,9 +17,10 @@ declare class Api2d {
     onMessage?: (message: string) => void;
     onEnd?: (message: string) => void;
     model?: string;
+    stream?: boolean;
     noCache?: boolean;
     [key: string]: any;
-  }): Promise<string>;
+  }): Promise<string> | Object;
 
   embeddings(options: {
       model?: string;
