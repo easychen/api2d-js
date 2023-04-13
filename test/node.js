@@ -65,5 +65,5 @@ async function vector()
     
 }
 
-// chat();
-vector();
+chat();
+// vector();

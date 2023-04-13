@@ -31,6 +31,7 @@ export default class Api2d
     abort()
     {
         this.controller.abort();
+        this.controller = new AbortController();
     }
 
     // Completion
@@ -59,6 +60,7 @@ export default class Api2d
                     // 使用 fetchEventSource 发送请求
                     const timeout_handle = setTimeout( () => {
                         this.controller.abort();
+                        this.controller = new AbortController();
                         // throw new Error( "Timeout "+ this.timeout );
                         reject( new Error( `[408]:Timeout by ${this.timeout} ms` ) );
                     }, this.timeout );
@@ -123,6 +125,7 @@ export default class Api2d
             });
             const timeout_handle = setTimeout( () => {
                 this.controller.abort();
+                this.controller = new AbortController();
 
             }, this.timeout );
             const ret = await response.json();
@@ -150,6 +153,7 @@ export default class Api2d
         });
         const timeout_handle = setTimeout( () => {
             this.controller.abort();
+            this.controller = new AbortController();
         }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
@@ -170,6 +174,7 @@ export default class Api2d
         });
         const timeout_handle = setTimeout( () => {
             this.controller.abort();
+            this.controller = new AbortController();
         }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
@@ -202,6 +207,7 @@ export default class Api2d
         });
         const timeout_handle = setTimeout( () => {
             this.controller.abort();
+            this.controller = new AbortController();
         }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
@@ -231,6 +237,7 @@ export default class Api2d
         });
         const timeout_handle = setTimeout( () => {
             this.controller.abort();
+            this.controller = new AbortController();
         }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
@@ -258,6 +265,7 @@ export default class Api2d
         });
         const timeout_handle = setTimeout( () => {
             this.controller.abort();
+            this.controller = new AbortController();
         }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
@@ -282,6 +290,7 @@ export default class Api2d
         });
         const timeout_handle = setTimeout( () => {
             this.controller.abort();
+            this.controller = new AbortController();
         }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
