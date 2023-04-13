@@ -183,9 +183,9 @@ module.exports = class Api2d {
             headers: headers,
             body: JSON.stringify({
                 text: text,
-                uuid: uuid??"",
+                uuid: uuid||"",
                 embedding: embedding,
-                meta: meta??""
+                meta: meta||""
               })
         });
         const timeout_handle = setTimeout( () => {
@@ -215,7 +215,7 @@ module.exports = class Api2d {
             body: JSON.stringify({
                 searchable_id,
                 embedding,
-                topk:topk??1
+                topk:topk||1
               })
         });
         const timeout_handle = setTimeout( () => {
