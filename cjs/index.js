@@ -34,10 +34,15 @@ module.exports = class Api2d {
         // 拼接目标URL
         const url = this.apiBaseUrl + '/v1/chat/completions';
         // 拼接headers
-        const headers = {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + this.key
-        };
+        function jsonDecode(jsonString) {
+          try {
+            const object = JSON.parse(jsonString);
+            return object;
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
+        }
 
         const { onMessage, onEnd, model, noCache ,  ...restOptions } = options;
 
@@ -103,16 +108,16 @@ module.exports = class Api2d {
             });
         } else {
             // 使用 fetch 发送请求
+            const timeout_handle = setTimeout( () => {
+                this.controller.abort();
+                this.controller = new AbortController();
+            }, this.timeout );
             const response = await fetch(url, {
                 signal: this.controller.signal,
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({ ...restOptions, model: model || 'gpt-3.5-turbo' })
             });
-            const timeout_handle = setTimeout(() => {
-                this.controller.abort();
-                this.controller = new AbortController();
-            }, this.timeout);
             const ret = await response.json();
             clearTimeout(timeout_handle);
             return ret;
@@ -129,16 +134,16 @@ module.exports = class Api2d {
         };
         const { model, ...restOptions } = options;
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout(() => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout);
         const response = await fetch(url, {
             signal: this.controller.signal,
             method: 'POST',
             headers: headers,
             body: JSON.stringify({ ...restOptions, model: model || 'text-embedding-ada-002' })
         });
-        const timeout_handle = setTimeout(() => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout);
         const ret = await response.json();
         clearTimeout(timeout_handle);
         return ret;
@@ -150,15 +155,15 @@ module.exports = class Api2d {
             'Content-Type': 'application/json',
             Authorization: 'Bearer ' + this.key
         };
+        const timeout_handle = setTimeout(() => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout);
         const response = await fetch(url, {
             signal: this.controller.signal,
             method: 'GET',
             headers: headers
         });
-        const timeout_handle = setTimeout(() => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout);
         const ret = await response.json();
         clearTimeout(timeout_handle);
         return ret;
@@ -175,7 +180,10 @@ module.exports = class Api2d {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + this.key
         };
-
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         // 使用 fetch 发送请求
         const response = await fetch( url, {
             signal: this.controller.signal,
@@ -188,10 +196,6 @@ module.exports = class Api2d {
                 meta: meta||""
               })
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;
@@ -208,6 +212,10 @@ module.exports = class Api2d {
             "Authorization": "Bearer " + this.key
         };
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
@@ -218,10 +226,6 @@ module.exports = class Api2d {
                 topk:topk||1
               })
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;
@@ -238,6 +242,10 @@ module.exports = class Api2d {
             "Authorization": "Bearer " + this.key
         };
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
@@ -246,10 +254,6 @@ module.exports = class Api2d {
                 uuid
               })
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;    
@@ -265,16 +269,16 @@ module.exports = class Api2d {
             "Authorization": "Bearer " + this.key
         };
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
             headers: headers,
             body: JSON.stringify({})
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;    

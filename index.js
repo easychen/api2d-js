@@ -146,16 +146,16 @@ export default class Api2d
         };
         const {model,  ...restOptions } = options;
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
             headers: headers,
             body: JSON.stringify( {...restOptions,model:model||'text-embedding-ada-002'} )
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;
@@ -226,6 +226,10 @@ export default class Api2d
             "Authorization": "Bearer " + this.key
         };
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
@@ -236,10 +240,6 @@ export default class Api2d
                 topk:topk||1
               })
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;
@@ -256,6 +256,10 @@ export default class Api2d
             "Authorization": "Bearer " + this.key
         };
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
@@ -264,10 +268,6 @@ export default class Api2d
                 uuid
               })
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;    
@@ -283,16 +283,17 @@ export default class Api2d
             "Authorization": "Bearer " + this.key
         };
         // 使用 fetch 发送请求
+        const timeout_handle = setTimeout( () => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout );
         const response = await fetch( url, {
             signal: this.controller.signal,
             method: "POST",
             headers: headers,
             body: JSON.stringify({})
         });
-        const timeout_handle = setTimeout( () => {
-            this.controller.abort();
-            this.controller = new AbortController();
-        }, this.timeout );
+        
         const ret = await response.json();
         clearTimeout( timeout_handle );
         return ret;    
