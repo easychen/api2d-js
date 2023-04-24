@@ -117,17 +117,18 @@ export default class Api2d
         }else
         {
             // 使用 fetch 发送请求
+            const timeout_handle = setTimeout( () => {
+                this.controller.abort();
+                this.controller = new AbortController();
+            }, this.timeout );
+
             const response = await fetch( url, {
                 signal: this.controller.signal,
                 method: "POST",
                 headers: headers,
                 body: JSON.stringify( {...restOptions, model:model||'gpt-3.5-turbo'} )
             });
-            const timeout_handle = setTimeout( () => {
-                this.controller.abort();
-                this.controller = new AbortController();
-
-            }, this.timeout );
+          
             const ret = await response.json();
             clearTimeout( timeout_handle );
             return ret;
