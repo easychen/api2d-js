@@ -339,13 +339,20 @@ export default class Api2d {
         }());
 
         if (responseType === 'file') {
-            return response_promise.then((blob) => saveData(blob, output));
+            const ret =  response_promise.then((blob) => saveData(blob, output));
+            clearTimeout(timeout_handle);
+            return ret;
+            
         } else if (responseType === 'blob') {
-            return response_promise;
+            const ret =  response_promise;
+            clearTimeout(timeout_handle);
+            return ret;
         } else if (responseType === 'blob-url') {
-            return response_promise.then((blob) => window.URL.createObjectURL(blob));
+            const ret =  response_promise.then((blob) => window.URL.createObjectURL(blob));
+            clearTimeout(timeout_handle);
+            return ret;
         } else {
-            throw new Error('responseType must be file or stream');
+            throw new Error('responseType must be file, blob or blob-url');
         }
     }
 

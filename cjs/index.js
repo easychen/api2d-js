@@ -297,7 +297,7 @@ module.exports = class Api2d {
             this.controller = new AbortController();
         }, this.timeout);
         const responseToFile = response => {
-            const file_stream = fs.createWriteStream(output);
+            const file_stream = fs.createWriteStream(output,{autoClose: true});
             const p = new Promise((resolve, reject) => {
                 response.body.on('data', data => {
                     file_stream.write(data);
@@ -305,7 +305,7 @@ module.exports = class Api2d {
 
                 response.body.on('end', () => {
                     file_stream.close();
-                    resolve();
+                    resolve(true);
                 })
 
                 response.body.on('error', err => {
@@ -344,11 +344,18 @@ module.exports = class Api2d {
         });
 
         if (responseType === 'file') {
-            return response_promise.then(response => responseToFile(response));
+            
+            const res = await response_promise;
+            const ret = await responseToFile(res);
+            clearTimeout(timeout_handle);
+            return ret;
         } else if (responseType === 'stream') {
-            return response_promise.then(response => responseToStream(response));
+            const ret = response_promise.then(response => responseToStream(response));
+            clearTimeout(timeout_handle);
+            return ret;
+            
         } else {
-            throw new Error('responseType must be file or stream');
+            throw new Error('responseType must be file, blob or blob-url'); 
         }
     }
 

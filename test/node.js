@@ -66,12 +66,13 @@ async function tts() {
     const api2d_instance = new api2d(forward_key);
     const text = '一纸淋漓漫点方圆透';
     // 调用 embedding 接口，将文本转为向量
-    await api2d_instance.textToSpeech({
+    const ret1 = await api2d_instance.textToSpeech({
         text,
         voiceName: 'zh-CN-XiaochenNeural',
         responseType: 'file',
         output: 'output.mp3'
     });
+    console.log("ret1",ret1);
 }
 
 async function ttsStream() {
@@ -99,5 +100,5 @@ async function stt() {
 // chat();
 // vector();
 // tts();
-// ttsStream();
-stt();
+ttsStream();
+// stt();

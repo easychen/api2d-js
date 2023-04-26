@@ -48,6 +48,22 @@ declare class Api2d {
     uuid: string
   }): Promise<any>;
   vectorDeleteAll(): Promise<any>;
+
+  textToSpeech(options: {
+    text: string;
+    voiceName: string;
+    responseType: 'file' | 'stream';
+    output: string | any;
+  }): Promise<boolean> | Promise<void>;
+
+  
+  speechToText(options: {
+    file: string;
+    language: string;
+    moderation?: boolean;
+    moderation_stop?: boolean;
+  }): Promise<string>;
+
 }
 
 export default Api2d
