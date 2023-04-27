@@ -37,15 +37,10 @@ module.exports = class Api2d {
         // 拼接目标URL
         const url = this.apiBaseUrl + '/v1/chat/completions';
         // 拼接headers
-        function jsonDecode(jsonString) {
-            try {
-                const object = JSON.parse(jsonString);
-                return object;
-            } catch (error) {
-                console.error(error);
-                return null;
-            }
-        }
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
 
         const {onMessage, onEnd, model, noCache, ...restOptions} = options;
 
@@ -297,7 +292,7 @@ module.exports = class Api2d {
             this.controller = new AbortController();
         }, this.timeout);
         const responseToFile = response => {
-            const file_stream = fs.createWriteStream(output,{autoClose: true});
+            const file_stream = fs.createWriteStream(output, {autoClose: true});
             const p = new Promise((resolve, reject) => {
                 response.body.on('data', data => {
                     file_stream.write(data);
@@ -344,7 +339,7 @@ module.exports = class Api2d {
         });
 
         if (responseType === 'file') {
-            
+
             const res = await response_promise;
             const ret = await responseToFile(res);
             clearTimeout(timeout_handle);
@@ -353,9 +348,9 @@ module.exports = class Api2d {
             const ret = response_promise.then(response => responseToStream(response));
             clearTimeout(timeout_handle);
             return ret;
-            
+
         } else {
-            throw new Error('responseType must be file, blob or blob-url'); 
+            throw new Error('responseType must be file, blob or blob-url');
         }
     }
 
