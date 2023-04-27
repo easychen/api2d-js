@@ -72,7 +72,7 @@ async function tts() {
         responseType: 'file',
         output: 'output.mp3'
     });
-    console.log("ret1",ret1);
+    console.log("ret1", ret1);
 }
 
 async function ttsStream() {
