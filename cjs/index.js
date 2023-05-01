@@ -283,7 +283,7 @@ module.exports = class Api2d {
     }
 
     async textToSpeech(options) {
-        const {text, voiceName, responseType, output} = options;
+        const {text, voiceName, responseType, output, speed} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/azure/tts";
         // 拼接headers
@@ -297,7 +297,7 @@ module.exports = class Api2d {
             this.controller = new AbortController();
         }, this.timeout);
         const responseToFile = response => {
-            const file_stream = fs.createWriteStream(output,{autoClose: true});
+            const file_stream = fs.createWriteStream(output, {autoClose: true});
             const p = new Promise((resolve, reject) => {
                 response.body.on('data', data => {
                     file_stream.write(data);
@@ -340,11 +340,12 @@ module.exports = class Api2d {
             body: JSON.stringify({
                 text,
                 voiceName,
+                speed
             })
         });
 
         if (responseType === 'file') {
-            
+
             const res = await response_promise;
             const ret = await responseToFile(res);
             clearTimeout(timeout_handle);
@@ -353,9 +354,9 @@ module.exports = class Api2d {
             const ret = response_promise.then(response => responseToStream(response));
             clearTimeout(timeout_handle);
             return ret;
-            
+
         } else {
-            throw new Error('responseType must be file, blob or blob-url'); 
+            throw new Error('responseType must be file, blob or blob-url');
         }
     }
 

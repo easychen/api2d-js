@@ -72,7 +72,7 @@ async function tts() {
         responseType: 'file',
         output: 'output.mp3'
     });
-    console.log("ret1",ret1);
+    console.log("ret1", ret1);
 }
 
 async function ttsStream() {
@@ -83,7 +83,8 @@ async function ttsStream() {
         text,
         voiceName: 'zh-CN-XiaochenNeural',
         responseType: 'stream',
-        output: fs.createWriteStream('outputStream.mp3')
+        output: fs.createWriteStream('outputStream.mp3'),
+        speed: 2
     });
 }
 
