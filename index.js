@@ -77,8 +77,13 @@ export default class Api2d {
                             } else {
                                 // console.log( e.data );
                                 const event = JSON.parse(e.data);
-                                if (event.choices[0].delta.content) chars += event.choices[0].delta.content;
-                                if (onMessage) onMessage(chars);
+                                const char = event.choices[0].delta.content;
+                                if (char)
+                                {
+                                    chars += char;
+                                    if (onMessage) onMessage(chars,char);
+                                }
+                                
                             }
 
                         },

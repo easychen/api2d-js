@@ -8,13 +8,13 @@ async function chat() {
         messages: [
             {
                 'role': 'user',
-                'content': '来首唐诗',
+                'content': '来首唐诗，杜甫的',
             }
         ],
         noCache: true,
         stream: true,
-        onMessage: (message) => {
-            console.log(message);
+        onMessage: (message,char) => {
+            console.log(char);
         }
     });
     console.log(response);
@@ -98,8 +98,8 @@ async function stt() {
     console.log(response);
 }
 
-// chat();
+chat();
 // vector();
 // tts();
-ttsStream();
+// ttsStream();
 // stt();

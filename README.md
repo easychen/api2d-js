@@ -4,6 +4,10 @@
 
 For some reason, I couldn't find a pure browser OpenAI SDK, they were all implemented in Node. So I wrote one myself, which is compatible with both OpenAI and [API2d](https://api2d.com/) keys.
 
+## Change Log
+
+- 0.1.22：tts支持speed参数
+
 ## Usage
 
 ```js

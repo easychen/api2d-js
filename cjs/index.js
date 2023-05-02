@@ -37,15 +37,10 @@ module.exports = class Api2d {
         // 拼接目标URL
         const url = this.apiBaseUrl + '/v1/chat/completions';
         // 拼接headers
-        function jsonDecode(jsonString) {
-            try {
-                const object = JSON.parse(jsonString);
-                return object;
-            } catch (error) {
-                console.error(error);
-                return null;
-            }
-        }
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + this.key
+        };
 
         const {onMessage, onEnd, model, noCache, ...restOptions} = options;
 
@@ -87,8 +82,12 @@ module.exports = class Api2d {
                                 resolve(chars);
                             } else {
                                 const event = JSON.parse(data);
-                                if (event.choices[0].delta.content) chars += event.choices[0].delta.content;
-                                if (onMessage) onMessage(chars);
+                                const char = event.choices[0].delta.content;
+                                if (char)
+                                {
+                                    chars += char;
+                                    if (onMessage) onMessage(chars,char);
+                                }
                             }
                         },
                         onerror: error => {
