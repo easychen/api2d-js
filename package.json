@@ -1,6 +1,6 @@
 {
   "name": "api2d",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "pure browser sdk for api2d and openai",
   "main": "cjs/index.js",
   "module": "index.js",
