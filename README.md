@@ -192,6 +192,7 @@ api.textToSpeech({
   text: '你好',
   voiceName: 'zh-CN-XiaochenNeural', // Azure 支持的声音列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts#supported-languages
   responseType: 'file',
+  speed: 1.5, // 语速，默认为 1，范围是 0.5~2，超出范围会自动改为最近的合法值
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核，在【转换音频之前】对文字进行审核
   moderation_stop: false, // 如果设置为 true，当内容违规会直接返回，不生成音频文件
 });
@@ -217,6 +218,7 @@ const blob = await api.textToSpeech({
   text: '你好',
   voiceName: 'zh-CN-XiaochenNeural', // Azure 支持的声音列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts#supported-languages
   responseType: 'blob',
+  speed: 1.5, // 语速，默认为 1，范围是 0.5~2，超出范围会自动改为最近的合法值
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核，在【转换音频之前】对文字进行审核
   moderation_stop: false, // 如果设置为 true，当内容违规会直接返回，不生成音频文件
 });
@@ -242,6 +244,7 @@ const blob_url = await api.textToSpeech({
   text: '你好',
   voiceName: 'zh-CN-XiaochenNeural', // Azure 支持的声音列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts#supported-languages
   responseType: 'blob-url',
+  speed: 1.5, // 语速，默认为 1，范围是 0.5~2，超出范围会自动改为最近的合法值
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核，在【转换音频之前】对文字进行审核
   moderation_stop: false, // 如果设置为 true，当内容违规会直接返回，不生成音频文件
 });
@@ -302,6 +305,7 @@ await api.textToSpeech({
   text: '你好',
   voiceName: 'zh-CN-XiaochenNeural', // Azure 支持的声音列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts#supported-languages
   responseType: 'file',
+  speed: 1.5, // 语速，默认为 1，范围是 0.5~2，超出范围会自动改为最近的合法值
   output: 'output.mp3', // 可以是一个完整路径
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核，在【转换音频之前】对文字进行审核
   moderation_stop: false, // 如果设置为 true，当内容违规会直接返回，不生成音频文件
@@ -328,6 +332,7 @@ await api.textToSpeech({
   text: '你好',
   voiceName: 'zh-CN-XiaochenNeural', // Azure 支持的声音列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts#supported-languages
   responseType: 'stream',
+  speed: 1.5, // 语速，默认为 1，范围是 0.5~2，超出范围会自动改为最近的合法值
   output: fs.createWriteStream('outputStream.mp3'),
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核，在【转换音频之前】对文字进行审核
   moderation_stop: false, // 如果设置为 true，当内容违规会直接返回，不生成音频文件

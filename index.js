@@ -279,7 +279,7 @@ export default class Api2d {
     }
 
     async textToSpeech(options) {
-        const {text, voiceName, responseType, output} = options;
+        const {text, voiceName, responseType, output, speed} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/azure/tts";
         // 拼接headers
@@ -299,6 +299,7 @@ export default class Api2d {
             body: JSON.stringify({
                 text,
                 voiceName,
+                speed
             })
         })
             .then((response) => {
@@ -339,16 +340,16 @@ export default class Api2d {
         }());
 
         if (responseType === 'file') {
-            const ret =  response_promise.then((blob) => saveData(blob, output));
+            const ret = response_promise.then((blob) => saveData(blob, output));
             clearTimeout(timeout_handle);
             return ret;
-            
+
         } else if (responseType === 'blob') {
-            const ret =  response_promise;
+            const ret = response_promise;
             clearTimeout(timeout_handle);
             return ret;
         } else if (responseType === 'blob-url') {
-            const ret =  response_promise.then((blob) => window.URL.createObjectURL(blob));
+            const ret = response_promise.then((blob) => window.URL.createObjectURL(blob));
             clearTimeout(timeout_handle);
             return ret;
         } else {

@@ -83,7 +83,8 @@ async function ttsStream() {
         text,
         voiceName: 'zh-CN-XiaochenNeural',
         responseType: 'stream',
-        output: fs.createWriteStream('outputStream.mp3')
+        output: fs.createWriteStream('outputStream.mp3'),
+        speed: 2
     });
 }
 

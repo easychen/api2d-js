@@ -278,7 +278,7 @@ module.exports = class Api2d {
     }
 
     async textToSpeech(options) {
-        const {text, voiceName, responseType, output} = options;
+        const {text, voiceName, responseType, output, speed} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/azure/tts";
         // 拼接headers
@@ -335,6 +335,7 @@ module.exports = class Api2d {
             body: JSON.stringify({
                 text,
                 voiceName,
+                speed
             })
         });
 
