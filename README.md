@@ -155,7 +155,7 @@ const api = new Api2d(key, apiBaseUrl, timeout);
 // stt
 const ret = await api.speechToText({
   file: document.querySelector('input').files[0], // 这里可以使用用户本地选择的文件，也可以通过各种形式构建 File 对象传入
-  language: 'zh-CN',
+  language: 'zh-CN', // 文字对应的语言，Azure 支持的语言列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=stt
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核
   moderation_stop: false, // 如果设置为 true，当内容违规会自动清除
 });
@@ -273,7 +273,7 @@ const api = new Api2d(key, apiBaseUrl, timeout);
 // stt
 const ret = await api.speechToText({
   file: 'demo.wav', // 可以是一个完整路径
-  language: 'zh-CN',
+  language: 'zh-CN', // 文字对应的语言，Azure 支持的语言列表：https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=stt
   moderation: false, // 如果设置为 true，会使用腾讯云的文本审核
   moderation_stop: false, // 如果设置为 true，当内容违规会自动清除
 });
