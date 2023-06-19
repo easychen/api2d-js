@@ -82,12 +82,18 @@ module.exports = class Api2d {
                                 resolve(chars);
                             } else {
                                 const event = JSON.parse(data);
-                                const char = event.choices[0].delta.content;
-                                if (char)
+                                if( event.error )
                                 {
-                                    chars += char;
-                                    if (onMessage) onMessage(chars,char);
-                                }
+                                    throw new Error(event.error.message);
+                                }else
+                                {
+                                    const char = event.choices[0].delta.content;
+                                    if (char)
+                                    {
+                                        chars += char;
+                                        if (onMessage) onMessage(chars,char);
+                                    }
+                                } 
                             }
                         },
                         onerror: error => {
