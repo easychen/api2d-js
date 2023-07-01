@@ -4,7 +4,7 @@ export default class Api2d {
     // 设置key和apiBaseUrl
     constructor(key = null, apiBaseUrl = null, timeout = 60000) {
         this.key = key;
-        this.apiBaseUrl = apiBaseUrl || (key && key.startsWith("fk") ? "https://openai.api2d.net" : "https://api.openai.com");
+        this.apiBaseUrl = apiBaseUrl || (key && key.startsWith("fk") ? "https://oa.api2d.net" : "https://api.openai.com");
         this.timeout = timeout;
         this.controller = new AbortController();
     }
@@ -130,6 +130,32 @@ export default class Api2d {
             clearTimeout(timeout_handle);
             return ret;
         }
+    }
+
+    async completionWithRetry ( data, retry = 2 ) 
+    {
+      return new Promise( (resolve, reject) => {
+        try {
+          this.completion(data).then( resolve ).catch( (err) => {
+            console.log( "err in completion", err );
+            if( retry > 0 && String(err).includes("retry") )
+            {
+              setTimeout( () => {
+                this.completionWithRetry( data, retry-1 ).then( resolve ).catch( reject );
+              }, 1000 );
+            }
+            else
+            {
+              console.log( "err in completion", error );
+              reject(err);
+            }
+          });
+          
+        } catch (error) {
+          console.log( "err in completion", error );
+        }
+        
+      });
     }
 
     async embeddings(options) {
@@ -400,6 +426,33 @@ export default class Api2d {
         clearTimeout(timeout_handle);
 
         return response.data;
+    }
+
+    async request( options )
+    {
+        const {url, method, headers, body, path, data} = options;
+        const timeout_handle = setTimeout(() => {
+            this.controller.abort();
+            this.controller = new AbortController();
+        }, this.timeout);
+        
+        const final_url = path ? this.apiBaseUrl +'/'+ path : url;
+        const final_data = data ? JSON.stringify(data) : body;
+        let option = {
+            signal: this.controller.signal,
+            method: method || 'GET',
+            headers: {...( headers ? headers : {} ), ...{
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this.key
+            }}
+        }
+        if( !['GET','HEAD'].includes( method.toUpperCase() )  ) option.body = final_data;
+        
+        const response = await fetch( final_url, option );
+        console.log( final_url, option, response );
+        const ret = await response.json();
+        clearTimeout(timeout_handle);
+        return ret;
     }
 }
 

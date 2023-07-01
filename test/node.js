@@ -4,7 +4,7 @@ const fs = require('fs');
 const forward_key = process.env.FORWARD_KEY || "fk...";
 async function chat() {
     const api2d_instance = new api2d(forward_key);
-    const response = await api2d_instance.completion({
+    const response = await api2d_instance.completionWithRetry({
         messages: [
             {
                 'role': 'user',
@@ -98,8 +98,19 @@ async function stt() {
     console.log(response);
 }
 
-chat();
+async function api()
+{
+    const api2d_instance = new api2d(forward_key);
+    const ret = await api2d_instance.request({
+        path: 'custom_api/186008/fetch?url='+encodeURIComponent('https://ftqq.com'),
+        method: 'GET'
+    }); 
+    console.log("ret=", ret);
+}
+
+// chat();
 // vector();
 // tts();
 // ttsStream();
 // stt();
+api();

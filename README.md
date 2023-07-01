@@ -6,6 +6,8 @@ For some reason, I couldn't find a pure browser OpenAI SDK, they were all implem
 
 ## Change Log
 
+- 0.1.25：添加带重试的请求方法 completionWithRetry，添加 request 方法以支持自定义接口
+
 - 0.1.22：tts支持speed参数
 
 ## Usage
