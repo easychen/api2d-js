@@ -137,9 +137,9 @@ module.exports = class Api2d {
     {
       return new Promise( (resolve, reject) => {
         try {
-          this.completion(data).then( resolve ).catch( (err) => {
-            console.log( "err in completion", err );
-            if( retry > 0 && String(err).includes("retry") )
+          this.completion(data).then( resolve ).catch( (error) => {
+            console.log( "error in completion", error );
+            if( retry > 0 && String(error).includes("retry") )
             {
               setTimeout( () => {
                 this.completionWithRetry( data, retry-1 ).then( resolve ).catch( reject );
@@ -147,7 +147,7 @@ module.exports = class Api2d {
             }
             else
             {
-              console.log( "err in completion", error );
+              console.log( "error in completion", error );
               reject(err);
             }
           });
