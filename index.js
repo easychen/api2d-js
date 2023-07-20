@@ -147,12 +147,12 @@ export default class Api2d {
             else
             {
               console.log( "error in completion", error );
-              reject(err);
+              reject(error);
             }
           });
           
         } catch (error) {
-          console.log( "err in completion", error );
+          console.log( "error in completion", error );
         }
         
       });

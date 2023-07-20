@@ -108,9 +108,9 @@ async function api()
     console.log("ret=", ret);
 }
 
-// chat();
+chat();
 // vector();
 // tts();
 // ttsStream();
 // stt();
-api();
+// api();

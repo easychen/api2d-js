@@ -148,7 +148,7 @@ module.exports = class Api2d {
             else
             {
               console.log( "error in completion", error );
-              reject(err);
+              reject(error);
             }
           });
           
