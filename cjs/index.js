@@ -6,9 +6,27 @@ const axios = require('axios');
 
 module.exports = class Api2d {
     // 设置key和apiBaseUrl
-    constructor(key = null, apiBaseUrl = null, timeout = 60000) {
+    constructor(key = null, apiBaseUrl = null, timeout = 60000, version = '2023-03-15-preview', deployments = {
+        'gpt-3.5-turbo':'GPT35',
+        'gpt-3.5-16k':'GPT35-16K',
+        'text-embedding-ada-002':'EBD002',
+    }) {
         this.key = key;
         this.apiBaseUrl = apiBaseUrl || (key && key.startsWith('fk') ? 'https://oa.api2d.net' : 'https://api.openai.com');
+        this.deployments = deployments;
+        this.version = version;
+        
+        // 如果 apiBaseUrl 包含 openai.azure.com 
+        if( this.apiBaseUrl.includes('openai.azure.com') )
+        {
+            this.by = 'azure';
+            this.authHeader = {'api-key': this.key};
+        }else
+        {
+            // openai 默认配置
+            this.by = key.startsWith('fk')  ? 'api2d' : 'openai';
+            this.authHeader = {"Authorization": "Bearer " + this.key};
+        }
         this.timeout = timeout;
         this.controller = new AbortController();
     }
@@ -32,19 +50,72 @@ module.exports = class Api2d {
         this.controller = new AbortController();
     }
 
+    api2dOnly( openaiOk = false )
+    {
+        if( openaiOk )
+        {
+            if( this.by != 'api2d'&& this.by != 'openai' )
+            {
+                throw new Error('Only support api2d');
+            }
+        }else
+        {
+            if( this.by != 'api2d' )
+            {
+                throw new Error('Only support api2d');
+            }
+        }
+        
+    }
+
+    buildUrlByModel(model)
+    {
+        console.log( "model", model );
+        if( this.by == 'azure' )
+        {
+            const deployment = this.deployments[model]||"GPT35";
+            if( String(model).toLowerCase().startsWith('text-embedding') )
+            {
+                return this.apiBaseUrl + '/openai/deployments/'+deployment+'/embeddings?api-version='+this.version;
+            }else
+            {
+                // if( model.toLowerCase().startsWith('gpt') )
+                // {
+                return this.apiBaseUrl + '/openai/deployments/'+deployment+'/chat/completions?api-version='+this.version;
+                // }
+            }
+        }
+        else
+        {
+            if( String(model).toLowerCase().startsWith('text-embedding') )
+            {
+                return this.apiBaseUrl + '/v1/embeddings';
+            }else
+            {
+                // if( model.toLowerCase().startsWith('gpt') )
+                // {
+                return this.apiBaseUrl + '/v1/chat/completions';
+                // }
+            
+            }
+        }
+    }
+
     
 
     // Completion
     async completion(options) {
-        // 拼接目标URL
-        const url = this.apiBaseUrl + '/v1/chat/completions';
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + this.key
+            ...this.authHeader,
         };
 
         const {onMessage, onEnd, model, noCache, ...restOptions} = options;
+
+        // 拼接目标URL
+        const url = this.buildUrlByModel(model || 'gpt-3.5-turbo');
+        const modelObj = this.by == 'azure' ? {} : {model: model || 'gpt-3.5-turbo'};
 
         if (noCache) headers['x-api2d-no-cache'] = 1;
 
@@ -62,13 +133,16 @@ module.exports = class Api2d {
                         // throw new Error( "Timeout "+ this.timeout );
                         reject(new Error(`[408]:Timeout by ${this.timeout} ms`));
                     }, this.timeout);
+
+                    console.log( "url", url, "opt", JSON.stringify({...restOptions, ...modelObj}));
+                        
                     const response = await fetchSSE(url, {
                         signal: this.controller.signal,
                         method: 'POST',
                         openWhenHidden: true,
                         fetch: fetch,
                         headers: {...headers, Accept: 'text/event-stream'},
-                        body: JSON.stringify({...restOptions, model: model || 'gpt-3.5-turbo'}),
+                        body: JSON.stringify({...restOptions, ...modelObj }),
                         async onopen(response) {
                             if (response.status != 200) {
                                 throw new Error(`[${response.status}]:${response.statusText}`);
@@ -125,7 +199,7 @@ module.exports = class Api2d {
                 signal: this.controller.signal,
                 method: 'POST',
                 headers: headers,
-                body: JSON.stringify({...restOptions, model: model || 'gpt-3.5-turbo'})
+                body: JSON.stringify({...restOptions,...modelObj})
             });
             const ret = await response.json();
             clearTimeout(timeout_handle);
@@ -160,14 +234,17 @@ module.exports = class Api2d {
     }
 
     async embeddings(options) {
-        // 拼接目标URL
-        const url = this.apiBaseUrl + '/v1/embeddings';
+        
         // 拼接headers
         const headers = {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + this.key
+            ...this.authHeader,
         };
         const {model, ...restOptions} = options;
+        const modelObj = this.by == 'azure' ? {} : {model: model || 'text-embedding-ada-002'};
+
+        // 拼接目标URL
+        const url = this.buildUrlByModel(model || 'text-embedding-ada-002');
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
             this.controller.abort();
@@ -177,7 +254,7 @@ module.exports = class Api2d {
             signal: this.controller.signal,
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({...restOptions, model: model || 'text-embedding-ada-002'})
+            body: JSON.stringify({...restOptions, ...modelObj})
         });
         const ret = await response.json();
         clearTimeout(timeout_handle);
@@ -185,6 +262,7 @@ module.exports = class Api2d {
     }
 
     async billing() {
+        this.api2dOnly(true);
         const url = this.apiBaseUrl + '/dashboard/billing/credit_grants';
         const headers = {
             'Content-Type': 'application/json',
@@ -205,6 +283,7 @@ module.exports = class Api2d {
     }
 
     async vectorSave(options) {
+        this.api2dOnly();
         // text, embedding, uuid = "", meta = ""
         const {text, embedding, uuid, meta} = options;
         // 拼接目标URL
@@ -212,7 +291,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + this.key
+            ...this.authHeader,
         };
         const timeout_handle = setTimeout(() => {
             this.controller.abort();
@@ -236,13 +315,14 @@ module.exports = class Api2d {
     }
 
     async vectorSearch(options) {
+        this.api2dOnly();
         const {searchable_id, embedding, topk} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/vector/search";
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + this.key
+            ...this.authHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -265,13 +345,14 @@ module.exports = class Api2d {
     }
 
     async vectorDelete(options) {
+        this.api2dOnly();
         const {uuid} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/vector/delete";
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + this.key
+            ...this.authHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -292,12 +373,13 @@ module.exports = class Api2d {
     }
 
     async vectorDeleteAll() {
+        this.api2dOnly();
         // 拼接目标URL
         const url = this.apiBaseUrl + "/vector/delete-all";
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + this.key
+            ...this.authHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -316,13 +398,14 @@ module.exports = class Api2d {
     }
 
     async textToSpeech(options) {
+        this.api2dOnly();
         const {text, voiceName, responseType, output, speed} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/azure/tts";
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + this.key,
+            ...this.authHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -394,13 +477,14 @@ module.exports = class Api2d {
     }
 
     async speechToText(options) {
+        this.api2dOnly();
         const {file, language, moderation, moderation_stop} = options;
         // 拼接目标URL
         const url = this.apiBaseUrl + "/azure/stt";
         // 拼接headers
         const headers = {
             "Content-Type": "multipart/form-data",
-            "Authorization": "Bearer " + this.key,
+            ...this.authHeader,
         };
         const {FormData, File} = await import("formdata-node");
 
@@ -430,6 +514,7 @@ module.exports = class Api2d {
 
     async request( options )
     {
+        this.api2dOnly();
         const {url, method, headers, body, path, data} = options;
         const timeout_handle = setTimeout(() => {
             this.controller.abort();
@@ -443,7 +528,7 @@ module.exports = class Api2d {
             method: method || 'GET',
             headers: {...( headers ? headers : {} ), ...{
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + this.key
+                ...this.authHeader,
             }}
         }
         if( !['GET','HEAD'].includes( method.toUpperCase() )  ) option.body = final_data;

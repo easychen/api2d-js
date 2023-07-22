@@ -4,7 +4,7 @@ const fs = require('fs');
 const forward_key = process.env.FORWARD_KEY || "fk...";
 async function chat() {
     const api2d_instance = new api2d(forward_key);
-    const response = await api2d_instance.completionWithRetry({
+    const response = await api2d_instance.completion({
         messages: [
             {
                 'role': 'user',
@@ -108,9 +108,28 @@ async function api()
     console.log("ret=", ret);
 }
 
-chat();
+async function azure() {
+    const api2d_instance = new api2d(forward_key, 'https://ai2co.openai.azure.com');
+    const response = await api2d_instance.completionWithRetry({
+        messages: [
+            {
+                'role': 'user',
+                'content': '来首唐诗，杜甫的',
+            }
+        ],
+        noCache: true,
+        stream: false,
+        onMessage: (message,char) => {
+            console.log(char);
+        }
+    });
+    console.log(response);
+}
+
+// chat();
 // vector();
-// tts();
+tts();
 // ttsStream();
 // stt();
 // api();
+// azure();
