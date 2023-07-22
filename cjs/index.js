@@ -6,9 +6,13 @@ const axios = require('axios');
 
 module.exports = class Api2d {
     // 设置key和apiBaseUrl
-    constructor(key = null, apiBaseUrl = null, timeout = 60000, version = '2023-03-15-preview', deployments = {
+    constructor(key = null, apiBaseUrl = null, timeout = 60000, version = '2023-07-01-preview', deployments = {
         'gpt-3.5-turbo':'GPT35',
+        'gpt-3.5-turbo-0301':'GPT35',
+        'gpt-3.5-turbo-0613':'GPT35',
         'gpt-3.5-16k':'GPT35-16K',
+        'gpt-3.5-16k-0613':'GPT35-16K',
+        'gpt-4':'GPT4',
         'text-embedding-ada-002':'EBD002',
     }) {
         this.key = key;
@@ -163,11 +167,14 @@ module.exports = class Api2d {
                                     throw new Error(event.error.message);
                                 }else
                                 {
-                                    const char = event.choices[0].delta.content;
-                                    if (char)
+                                    if( event.choices && event.choices.length > 0 )
                                     {
-                                        chars += char;
-                                        if (onMessage) onMessage(chars,char);
+                                        const char = event.choices[0].delta.content;
+                                        if (char)
+                                        {
+                                            chars += char;
+                                            if (onMessage) onMessage(chars,char);
+                                        }
                                     }
                                 } 
                             }

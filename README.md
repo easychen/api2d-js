@@ -6,6 +6,24 @@ For some reason, I couldn't find a pure browser OpenAI SDK, they were all implem
 
 ## Change Log
 
+- 0.1.28：兼容Azure OpenAI 接口
+
+使用方式：
+
+1. apiBaseUrl 填入部署模型的域名部分如 `https://ai2co.openai.azure.com`
+2. 按 deployments 参数中 `模型→部署名` 的对应关系在 Azure 上部署模型。如果你已经部署过模型，也可以修改 deployments 对象的值，并作为参数传递
+
+```
+(key = null, apiBaseUrl = null, timeout = 60000, version = '2023-07-01-preview', deployments = {
+        'gpt-3.5-turbo':'GPT35',
+        'gpt-3.5-turbo-0301':'GPT35',
+        'gpt-3.5-turbo-0613':'GPT35',
+        'gpt-3.5-16k':'GPT35-16K',
+        'gpt-3.5-16k-0613':'GPT35-16K',
+        'gpt-4':'GPT4',
+        'text-embedding-ada-002':'EBD002',
+    }) 
+```
 - 0.1.25：添加带重试的请求方法 completionWithRetry，添加 request 方法以支持自定义接口
 
 - 0.1.22：tts支持speed参数

@@ -117,6 +117,7 @@ async function azure() {
                 'content': '来首唐诗，杜甫的',
             }
         ],
+        model:'gpt-3.5-turbo-0613',
         noCache: true,
         stream: false,
         onMessage: (message,char) => {
@@ -128,8 +129,8 @@ async function azure() {
 
 // chat();
 // vector();
-tts();
+// tts();
 // ttsStream();
 // stt();
 // api();
-// azure();
+azure();
