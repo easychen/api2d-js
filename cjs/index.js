@@ -129,7 +129,7 @@ module.exports = class Api2d {
             return new Promise(async (resolve, reject) => {
                 try {
                     let chars = '';
-                    console.log('in stream');
+                    // console.log('in stream');
                     // 使用 fetchEventSource 发送请求
                     const timeout_handle = setTimeout(() => {
                         this.controller.abort();
@@ -138,7 +138,7 @@ module.exports = class Api2d {
                         reject(new Error(`[408]:Timeout by ${this.timeout} ms`));
                     }, this.timeout);
 
-                    console.log( "url", url, "opt", JSON.stringify({...restOptions, ...modelObj}));
+                    // console.log( "url", url, "opt", JSON.stringify({...restOptions, ...modelObj}));
                         
                     const response = await fetchSSE(url, {
                         signal: this.controller.signal,

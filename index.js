@@ -123,7 +123,7 @@ export default class Api2d {
             return new Promise(async (resolve, reject) => {
                 try {
                     let chars = "";
-                    console.log("in stream");
+                    // console.log("in stream");
                     // 使用 fetchEventSource 发送请求
                     const timeout_handle = setTimeout(() => {
                         this.controller.abort();
