@@ -119,18 +119,22 @@ async function azure() {
         ],
         model:'gpt-3.5-turbo-0613',
         noCache: true,
-        stream: false,
+        stream: true,
         onMessage: (message,char) => {
             console.log(char);
+        },
+        onEnd: () => {
+            console.log("onEnd");
         }
     });
-    console.log(response);
+
+    console.log("await end", response);
 }
 
-// chat();
+chat();
 // vector();
 // tts();
 // ttsStream();
 // stt();
 // api();
-azure();
+// azure();
