@@ -115,11 +115,15 @@ module.exports = class Api2d {
             ...this.authHeader,
         };
 
-        const {onMessage, onEnd, model, noCache, ...restOptions} = options;
+        const {onMessage, onEnd, model, noCache, ...otherOptions} = options;
 
         // 拼接目标URL
         const url = this.buildUrlByModel(model || 'gpt-3.5-turbo');
         const modelObj = this.by == 'azure' ? {} : {model: model || 'gpt-3.5-turbo'};
+
+        const { moderation, moderation_stop, ...optionsWithoutModeration } = otherOptions;
+        
+        const restOptions = this.by == 'api2d' ? otherOptions : optionsWithoutModeration;
 
         if (noCache) headers['x-api2d-no-cache'] = 1;
 

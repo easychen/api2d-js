@@ -1,6 +1,6 @@
 {
   "name": "api2d",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "pure browser sdk for api2d and openai",
   "main": "cjs/index.js",
   "module": "index.js",
@@ -14,6 +14,7 @@
     "axios": "^1.3.6",
     "eventsource-parser": "^1.0.0",
     "formdata-node": "^5.0.0",
-    "node-fetch": "^2.6.9"
+    "https-proxy-agent": "^7.0.1",
+    "node-fetch": "2"
   }
 }

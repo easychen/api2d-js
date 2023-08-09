@@ -1,9 +1,19 @@
 const api2d = require('../cjs/index.js');
 const fs = require('fs');
+const nodeFetch = require('node-fetch');
+const { HttpsProxyAgent } = require('https-proxy-agent');
+
+global.fetch =  (url, options) => {
+    const data = {
+      ...options,
+      ...( process.env.http_proxy? { "agent": new HttpsProxyAgent(process.env.http_proxy) } : {})
+    };
+    return nodeFetch(url, data);
+  };
 // 从环境变量取得key
 const forward_key = process.env.FORWARD_KEY || "fk...";
 async function chat() {
-    const api2d_instance = new api2d(forward_key);
+    const api2d_instance = new api2d(forward_key, forward_key.startsWith("sk")? 'https://api.openai.com' : 'https://oa.api2d.com');
     const response = await api2d_instance.completion({
         messages: [
             {
