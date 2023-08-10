@@ -554,7 +554,7 @@ module.exports = class Api2d {
         if( !['GET','HEAD'].includes( method.toUpperCase() )  ) option.body = final_data;
         
         const response = await fetch( final_url, option );
-        console.log( final_url, option, response );
+        // console.log( final_url, option, response );
         const ret = await response.json();
         clearTimeout(timeout_handle);
         return ret;
