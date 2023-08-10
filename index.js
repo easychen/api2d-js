@@ -70,7 +70,7 @@ export default class Api2d {
 
     buildUrlByModel(model)
     {
-        console.log( "model", model );
+        // console.log( "model", model );
         if( this.by == 'azure' )
         {
             const deployment = this.deployments[model]||"GPT35";
