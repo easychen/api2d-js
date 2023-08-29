@@ -137,6 +137,7 @@ export default class Api2d {
                     }, this.timeout);
                     const response = await fetchEventSource(url, {
                         signal: this.controller.signal,
+                        openWhenHidden: false,
                         method: "POST",
                         headers: {...headers, "Accept": "text/event-stream"},
                         body: JSON.stringify({...restOptions, ...modelObj}),
