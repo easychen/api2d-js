@@ -30,6 +30,14 @@ module.exports = class Api2d {
             // openai 默认配置
             this.by = key.startsWith('fk')  ? 'api2d' : 'openai';
             this.authHeader = {"Authorization": "Bearer " + this.key};
+
+            if( key.startsWith('sk-or-') )
+            {
+                this.refHeader = {"HTTP-Referer":"https://ai0c.com"};
+            }else
+            {
+                this.refHeader = {};
+            }
         }
         this.timeout = timeout;
         this.controller = new AbortController();
@@ -112,7 +120,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
 
         const {onMessage, onEnd, model, noCache, ...otherOptions} = options;
@@ -153,7 +161,8 @@ module.exports = class Api2d {
                         body: JSON.stringify({...restOptions, ...modelObj }),
                         async onopen(response) {
                             if (response.status != 200) {
-                                throw new Error(`[${response.status}]:${response.statusText}`);
+                                const info = await response.text();
+                                throw new Error(`[${response.status}]:${response.statusText} ${info}`);
                             }
                         },
                         onmessage: (data) => {
@@ -165,6 +174,7 @@ module.exports = class Api2d {
                                 if (onEnd) onEnd(chars);
                                 resolve(chars);
                             } else {
+                                if( !isJSON(data) ) return;
                                 const event = JSON.parse(data);
                                 if( event.error )
                                 {
@@ -258,7 +268,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             'Content-Type': 'application/json',
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         const {model, ...restOptions} = options;
         const modelObj = this.by == 'azure' ? {} : {model: model || 'text-embedding-ada-002'};
@@ -311,7 +321,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         const timeout_handle = setTimeout(() => {
             this.controller.abort();
@@ -342,7 +352,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -372,7 +382,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -399,7 +409,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -425,7 +435,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         // 使用 fetch 发送请求
         const timeout_handle = setTimeout(() => {
@@ -504,7 +514,7 @@ module.exports = class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "multipart/form-data",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         const {FormData, File} = await import("formdata-node");
 
@@ -548,7 +558,7 @@ module.exports = class Api2d {
             method: method || 'GET',
             headers: {...( headers ? headers : {} ), ...{
                 "Content-Type": "application/json",
-                ...this.authHeader,
+                ...this.authHeader,...this.refHeader,
             }}
         }
         if( !['GET','HEAD'].includes( method.toUpperCase() )  ) option.body = final_data;
@@ -560,3 +570,23 @@ module.exports = class Api2d {
         return ret;
     }
 };
+
+// 一个测试能否被JSON parse的函数
+function isJSON(str) {
+    if (typeof str == 'string') {
+        try {
+            const obj = JSON.parse(str);
+            if (typeof obj == 'object' && obj) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (e) {
+            console.log('error：' + str + '!!!' + e);
+            return false;
+        }
+    }
+    console.log('It is not a string!')
+    return false;
+}

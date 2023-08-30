@@ -13,7 +13,7 @@ global.fetch =  (url, options) => {
 // 从环境变量取得key
 const forward_key = process.env.FORWARD_KEY || "fk...";
 async function chat() {
-    const api2d_instance = new api2d(forward_key, forward_key.startsWith("sk")? 'https://api.openai.com' : 'https://oa.api2d.net');
+    const api2d_instance = new api2d(forward_key, forward_key.startsWith("sk")? 'https://openrouter.ai/api/' : 'https://oa.api2d.net');
     const response = await api2d_instance.completion({
         messages: [
             {
@@ -21,6 +21,7 @@ async function chat() {
                 'content': '来首唐诗，杜甫的',
             }
         ],
+        model: "anthropic/claude-2",
         noCache: true,
         stream: true,
         onMessage: (message,char) => {

@@ -26,6 +26,14 @@ export default class Api2d {
             // openai 默认配置
             this.by = key.startsWith('fk')  ? 'api2d' : 'openai';
             this.authHeader = {"Authorization": "Bearer " + this.key};
+
+            if( key.startsWith('sk-or-') )
+            {
+                this.refHeader = {"HTTP-Referer":"https://ai0c.com"};
+            }else
+            {
+                this.refHeader = {};
+            }
         }
         this.timeout = timeout;
         this.controller = new AbortController();
@@ -106,7 +114,7 @@ export default class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
 
         const {onMessage, onEnd, model, noCache, ...otherOptions} = options;
@@ -143,7 +151,8 @@ export default class Api2d {
                         body: JSON.stringify({...restOptions, ...modelObj}),
                         async onopen(response) {
                             if (response.status != 200) {
-                                throw new Error(`[${response.status}]:${response.statusText}`);
+                                const info = await response.text();
+                                throw new Error(`[${response.status}]:${response.statusText} ${info}`);
                             }
                         },
                         onmessage: e => {
@@ -155,7 +164,8 @@ export default class Api2d {
                                 if (onEnd) onEnd(chars);
                                 resolve(chars);
                             } else {
-                                // console.log( e.data );
+                                // 忽略所有非JSON的数据
+                                if( !isJSON(e.data) ) return;
                                 const event = JSON.parse(e.data);
                                 if( event.error )
                                 {
@@ -255,7 +265,7 @@ export default class Api2d {
         // 拼接headers
         const headers = {
             "Content-Type": "application/json",
-            ...this.authHeader,
+            ...this.authHeader,...this.refHeader,
         };
         const {model, ...restOptions} = options;
         const modelObj = this.by == 'azure' ? {} : {model: model || 'text-embedding-ada-002'};
@@ -557,6 +567,26 @@ export default class Api2d {
         clearTimeout(timeout_handle);
         return ret;
     }
+}
+
+// 一个测试能否被JSON parse的函数
+function isJSON(str) {
+    if (typeof str == 'string') {
+        try {
+            const obj = JSON.parse(str);
+            if (typeof obj == 'object' && obj) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (e) {
+            console.log('error：' + str + '!!!' + e);
+            return false;
+        }
+    }
+    console.log('It is not a string!')
+    return false;
 }
 
 
