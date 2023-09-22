@@ -175,19 +175,18 @@ export default class Api2d {
                                     if( event.choices && event.choices.length > 0 )
                                     {
                                         // azure 不返回 [DONE]，而是返回 finish_reason
+                                        const char = event.choices[0].delta.content;
+                                        if (char)
+                                        {
+                                            chars += char;
+                                            if (onMessage) onMessage(chars,char);
+                                        }
+
                                         if( event.choices[0].finish_reason )
                                         {
                                             // end
                                             if (onEnd) onEnd(chars);
                                             resolve(chars);
-                                        }else
-                                        {
-                                            const char = event.choices[0].delta.content;
-                                            if (char)
-                                            {
-                                                chars += char;
-                                                if (onMessage) onMessage(chars,char);
-                                            }
                                         }
                                     }
                                 }

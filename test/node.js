@@ -21,7 +21,7 @@ async function chat() {
                 'content': '来首唐诗，杜甫的',
             }
         ],
-        model: "anthropic/claude-2",
+        model: "gpt-3.5-turbo",
         noCache: true,
         stream: true,
         onMessage: (message,char) => {
