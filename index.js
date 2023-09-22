@@ -182,6 +182,11 @@ export default class Api2d {
                                             if (onMessage) onMessage(chars,char);
                                         }
 
+                                        if( event.action && event.action === 'clean' )
+                                        {
+                                            chars = "";
+                                        }
+
                                         if( event.choices[0].finish_reason )
                                         {
                                             // end

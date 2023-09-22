@@ -6,6 +6,7 @@ For some reason, I couldn't find a pure browser OpenAI SDK, they were all implem
 
 ## Change Log
 
+- 0.1.36：修正chunk同时包含content和stop时，无法显示内容的问题，支持event action（清屏）
 - 0.1.33：强制关闭 `@microsoft/fetch-event-source` 默认配置导致的请求重发
 - 0.1.31：从api层删除发送给OpenAI的moderation的header以避免400错误
 

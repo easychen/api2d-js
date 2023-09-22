@@ -189,6 +189,12 @@ module.exports = class Api2d {
                                             chars += char;
                                             if (onMessage) onMessage(chars,char);
                                         }
+
+                                        if( event.action && event.action === 'clean' )
+                                        {
+                                            chars = "";
+                                        }
+                                        
                                         // azure 不返回 [DONE]，而是返回 finish_reason
                                         if( event.choices[0].finish_reason )
                                         {
