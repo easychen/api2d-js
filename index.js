@@ -3,13 +3,13 @@ import {fetchEventSource} from '@microsoft/fetch-event-source';
 export default class Api2d {
     // 设置key和apiBaseUrl
     constructor(key = null, apiBaseUrl = null, timeout = 60000, version = '2023-07-01-preview', deployments = {
-        'gpt-3.5-turbo':'GPT35',
-        'gpt-3.5-turbo-0301':'GPT35',
-        'gpt-3.5-turbo-0613':'GPT35',
-        'gpt-3.5-16k':'GPT35-16K',
-        'gpt-3.5-16k-0613':'GPT35-16K',
-        'gpt-4':'GPT4',
-        'text-embedding-ada-002':'EBD002',
+        'gpt-3.5-turbo':'gpt-35-turbo',
+        'gpt-3.5-turbo-0301':'gpt-35-turbo-0301',
+        'gpt-3.5-turbo-0613':'gpt-35-turbo-0613',
+        'gpt-3.5-16k':'gpt-35-16k',
+        'gpt-3.5-16k-0613':'gpt-35-16k-0613',
+        'gpt-4':'gpt-4',
+        'text-embedding-ada-002':'text-embedding-ada-002',
     }) {
         this.key = key;
         this.apiBaseUrl = apiBaseUrl || (key && key.startsWith('fk') ? 'https://oa.api2d.net' : 'https://api.openai.com');
