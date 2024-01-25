@@ -142,7 +142,27 @@ async function azure() {
     console.log("await end", response);
 }
 
-chat();
+async function image()
+{
+    const api2d_instance = new api2d(forward_key);
+    const ret = await api2d_instance.imageGenerate(
+    {
+        "prompt": "A painting of a cat"
+    });
+    console.log(ret);
+    // {
+    //     created: 1706192857,
+    //     data: [
+    //       {
+    //         revised_prompt: 'A decapturing the beauty of the natural world.',
+    //         url: 'https://oaidalleapiprodscus.blob.core.windows.net/private/org-KRG1eKn1nbXZ7vixuyJhpE6u/user-FQRBcGpSkM35GekObogjwLrc/img-ejom6IucUTN9l7fN6ms4aTuK.png?st=2024-01-25T13%3A27%3A37Z&se=2024-01-25T15%3A27%3A37Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-24T22%3A00%3A38Z&ske=2024-01-25T22%3A00%3A38Z&sks=b&skv=2021-08-06&sig=Jv6wGPUdsRCgOSmu348UfeIzaOkSwMjDVdP6MwuXCDU%3D'
+    //       }
+    //     ]
+    //   }
+}
+
+image();
+// chat();
 // vector();
 // tts();
 // ttsStream();

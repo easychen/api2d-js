@@ -544,6 +544,27 @@ export default class Api2d {
         return response.data;
     }
 
+    async imageGenerate(options) {
+        let { model, prompt, n, size, response_format} = options;
+        if( !n ) n = 1;
+        if( !size ) size = '1024x1024';
+        if( !response_format ) response_format = 'url';
+        if( !['dall-e-2','dall-e-3'].includes(model) ) model = 'dall-e-3';
+
+        const ret = await this.request({
+            path: 'v1/images/generations',
+            method: 'POST',
+            data: {
+                prompt,
+                n,
+                size,
+                model,
+                response_format
+            }
+        })
+        return ret;
+    }
+
     async request( options )
     {
         this.api2dOnly();

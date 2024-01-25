@@ -64,6 +64,14 @@ declare class Api2d {
     moderation_stop?: boolean;
   }): Promise<string>;
 
+  imageGenerate(options: {
+    model?: string;
+    prompt?: string;
+    n?: number;
+    size?: string;
+    response_format?: string;
+  }): Promise<any>;
+
 }
 
 export default Api2d

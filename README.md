@@ -6,6 +6,8 @@ For some reason, I couldn't find a pure browser OpenAI SDK, they were all implem
 
 ## Change Log
 
+- 0.1.39 添加 imageGenerate 方法，用于调用 DALL 生成图片
+
 - 0.1.37：Azure默认模型名称采用去掉小数点的版本
 
 ```
