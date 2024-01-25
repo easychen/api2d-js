@@ -561,13 +561,13 @@ export default class Api2d {
                 model,
                 response_format
             }
-        })
+        }, false);
         return ret;
     }
 
-    async request( options )
+    async request( options, api2dOnly = ture  )
     {
-        this.api2dOnly();
+        if(api2dOnly) this.api2dOnly();
         const {url, method, headers, body, path, data} = options;
         const timeout_handle = setTimeout(() => {
             this.controller.abort();
