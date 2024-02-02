@@ -7,6 +7,8 @@ declare class Api2d {
     timeout?: number,
   );
 
+  setKey(key: string): void;
+
   setApiBaseUrl(apiBaseUrl: string): void;
 
   setTimeout(timeout: number): void;
