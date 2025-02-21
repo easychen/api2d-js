@@ -11,23 +11,31 @@ export default class Api2d {
         'gpt-4':'gpt-4',
         'text-embedding-ada-002':'text-embedding-ada-002',
     }) {
-        this.key = key;
+        this.key = key || '';
         this.apiBaseUrl = apiBaseUrl || (key && key.startsWith('fk') ? 'https://oa.api2d.net' : 'https://api.openai.com');
         this.deployments = deployments;
         this.version = version;
-        
-        // 如果 apiBaseUrl 包含 openai.azure.com 
+
+        this._updateHeaders()
+        this.timeout = timeout;
+        this.controller = new AbortController();
+    }
+
+    // 根据 key 和 apiBaseUrl，更新请求 headers
+    _updateHeaders() {
+        // 如果 apiBaseUrl 包含 openai.azure.com
         if( this.apiBaseUrl.includes('openai.azure.com') )
         {
             this.by = 'azure';
             this.authHeader = {'api-key': this.key};
+            this.refHeader = {};
         }else
         {
             // openai 默认配置
-            this.by = key.startsWith('fk')  ? 'api2d' : 'openai';
+            this.by = this.key.startsWith('fk')  ? 'api2d' : 'openai';
             this.authHeader = {"Authorization": "Bearer " + this.key};
 
-            if( key.startsWith('sk-or-') )
+            if( this.key.startsWith('sk-or-') )
             {
                 this.refHeader = {"HTTP-Referer":"https://ai0c.com"};
             }else
@@ -35,18 +43,18 @@ export default class Api2d {
                 this.refHeader = {};
             }
         }
-        this.timeout = timeout;
-        this.controller = new AbortController();
     }
 
     // set key
     setKey(key) {
-        this.key = key;
+        this.key = key || '';
+        this._updateHeaders()
     }
 
     // set apiBaseUrl
     setApiBaseUrl(apiBaseUrl) {
         this.apiBaseUrl = apiBaseUrl;
+        this._updateHeaders()
     }
 
     setTimeout(timeout) {
