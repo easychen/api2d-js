@@ -19,6 +19,7 @@ export default class Api2d {
         this._updateHeaders()
         this.timeout = timeout;
         this.controller = new AbortController();
+        this.apiVersion = 1;
     }
 
     // 根据 key 和 apiBaseUrl，更新请求 headers
@@ -55,6 +56,10 @@ export default class Api2d {
     setApiBaseUrl(apiBaseUrl) {
         this.apiBaseUrl = apiBaseUrl;
         this._updateHeaders()
+    }
+    // set apiVersion
+    setApiVersion(apiVersion) {
+        this.apiVersion = apiVersion;
     }
 
     setTimeout(timeout) {
@@ -103,16 +108,17 @@ export default class Api2d {
         }
         else
         {
+            const trimmedUrl = this.apiBaseUrl.replace(/\/*$/, '');
             if( String(model).toLowerCase().startsWith('text-embedding') )
             {
-                return this.apiBaseUrl + '/v1/embeddings';
+                if (trimmedUrl.match(/\/v\d+$/))
+                    return `${trimmedUrl}/embeddings`;
+                return `${trimmedUrl}/v${this.apiVersion}/embeddings`;
             }else
             {
-                // if( model.toLowerCase().startsWith('gpt') )
-                // {
-                return this.apiBaseUrl + '/v1/chat/completions';
-                // }
-            
+                if (trimmedUrl.match(/\/v\d+$/))
+                    return `${trimmedUrl}/chat/completions`;
+                return `${trimmedUrl}/v${this.apiVersion}/chat/completions`;
             }
         }
     }
@@ -125,7 +131,7 @@ export default class Api2d {
             ...this.authHeader,...this.refHeader,
         };
 
-        const {onMessage, onEnd, model, noCache, ...otherOptions} = options;
+        const {onMessage, onReasoning, onEnd, model, noCache, ...otherOptions} = options;
 
         // 拼接目标URL
         const url = this.buildUrlByModel(model || 'gpt-3.5-turbo');
@@ -184,10 +190,14 @@ export default class Api2d {
                                     {
                                         // azure 不返回 [DONE]，而是返回 finish_reason
                                         const char = event.choices[0].delta.content;
+                                        const reasoning_char = event.choices[0].delta.reasoning_content || '';
                                         if (char)
                                         {
                                             chars += char;
                                             if (onMessage) onMessage(chars,char);
+                                        }else if(reasoning_char)
+                                        {
+                                            if(onReasoning) onReasoning(reasoning_char);
                                         }
 
                                         if( event.action && event.action === 'clean' )

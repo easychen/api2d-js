@@ -10,6 +10,7 @@ declare class Api2d {
   setKey(key: string): void;
 
   setApiBaseUrl(apiBaseUrl: string): void;
+  setApiVersion(apiVersion: number): void;
 
   setTimeout(timeout: number): void;
 
@@ -17,6 +18,7 @@ declare class Api2d {
 
   completion(options: {
     onMessage?: (message: string) => void;
+    onReasoning?: (message: string) => void;
     onEnd?: (message: string) => void;
     model?: string;
     stream?: boolean;

@@ -161,7 +161,53 @@ async function image()
     //   }
 }
 
-image();
+async function deepChat() {
+    const api2d_instance = new api2d(forward_key, 'https://api.siliconflow.cn');
+    const response = await api2d_instance.completion({
+        messages: [
+            {
+                'role': 'user',
+                'content': '为加班的Easy同学写一首青玉案，要求幽默风趣',
+            }
+        ],
+        model: "Pro/deepseek-ai/DeepSeek-R1",
+        noCache: true,
+        stream: true,
+        onReasoning: (message) => {
+            console.log("🤔"+message);
+        },
+        onMessage: (message,char) => {
+            console.log(char);
+        }
+    });
+    console.log(response);
+}
+
+async function deepChatVol() {
+    const api2d_instance = new api2d(forward_key, 'https://oa.api2d.net');
+    // api2d_instance.setApiVersion(3);
+    const response = await api2d_instance.completion({
+        messages: [
+            {
+                'role': 'user',
+                'content': '为加班的Easy同学写一首破阵子，要求幽默风趣',
+            }
+        ],
+        model: "gemini-2.0-flash",
+        stream: true,
+        onReasoning: (message) => {
+            console.log("🤔"+message);
+        },
+        onMessage: (message,char) => {
+            console.log(char);
+        }
+    });
+    console.log(response);
+}
+
+deepChatVol();
+// deepChat();
+// image();
 // chat();
 // vector();
 // tts();
