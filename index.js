@@ -109,7 +109,7 @@ export default class Api2d {
         else
         {
             const trimmedUrl = this.apiBaseUrl.replace(/\/*$/, '');
-            if( String(model).toLowerCase().startsWith('text-embedding') )
+            if( String(model).toLowerCase().startsWith('text-embedding') || String(model).toLowerCase().endsWith('bge-m3') )
             {
                 if (trimmedUrl.match(/\/v\d+$/))
                     return `${trimmedUrl}/embeddings`;
