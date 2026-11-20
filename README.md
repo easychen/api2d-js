@@ -149,13 +149,6 @@ console.log(transcript.text, transcript.requestId, transcript.chargedPoints);
 - `audioTranscribe` 默认用 `gpt-transcribe`，流式上限 720 秒，非流式接收上限 600 秒。`audioTranslate` 默认用 `gpt-realtime-translate`，英文输出，流式 480 秒，非流式接收上限 300 秒。
 - 推荐 `stream: true`，默认使用 JSON 事件。应用以 `onDelta(delta, text)` 接收增量和累积文字，Promise 返回完整结果。开启已配置的腾讯云文本审核时，服务端返回 JSON。公网代理在非流式请求等待约 125 秒后可能超时。新版上传与响应大小各为 5,000,000 字节。
 - `audioSpeech({ input, voice, ... })` 默认用 `gpt-realtime-2.1-mini`，最多 500 个 UTF-16 代码单元。返回 `{ audio, contentType, requestId, chargedPoints }`，其中 `audio` 是 `ArrayBuffer`。
-### 避免重复提交（可选）
-
-`idempotencyKey` 是可选项。客户端超时或断线后，服务端可能已开始处理，程序自动重发会有重复生成和扣点的风险。想防止这种情况，可以在首次发送前保存自己生成的客户端请求编号。同一次请求重试时，把同一个编号传给 `idempotencyKey`。
-
-- **图片生成**用原编号和相同参数重试可查看原请求状态或取回仍有效的图片链接。
-- **音频处理**使用已受理的编号会收到 `409`，表示这次没有再次生成或扣点。音频文件、转录和译文只随原请求的响应交付。
-- **确实想重新生成**时换一个新编号，或省略 `idempotencyKey`。服务端会当成新请求并单独计费。
 
 音频 HTTP 或 SSE 错误可通过异常的 `status`、`code` 和 `requestId` 排查。
 
@@ -449,3 +442,11 @@ api.abort(); // 主动取消请求
 输出是一个 stream，这里我们只是把它写入本地文件，你也可以自行处理实现更多功能，比如一边生成一边播放。
 
 [更多例子](https://github.com/easychen/api2d-js/pull/3#issuecomment-1498753640)
+
+## 避免重复提交（可选）
+
+`idempotencyKey` 是可选项。客户端超时或断线后，服务端可能已开始处理，程序自动重发会有重复生成和扣点的风险。想防止这种情况，可以在首次发送前保存自己生成的客户端请求编号。同一次请求重试时，使用同一个 Forward Key，把原编号传给 `idempotencyKey`。
+
+- **图片生成**用原编号和相同参数重试可查看原请求状态或取回仍有效的图片链接。
+- **音频处理**使用已受理的编号会收到 `409`，表示这次没有再次生成或扣点。音频文件、转录和译文只随原请求的响应交付。
+- **确实想重新生成**时换一个新编号，或省略 `idempotencyKey`。服务端会当成新请求并单独计费。
