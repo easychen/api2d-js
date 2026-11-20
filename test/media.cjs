@@ -33,6 +33,16 @@ async function serve(request, response) {
         if (data.prompt === 'conflict') return json(response, { error: { code: 'idempotency_conflict', message: 'Conflict' } }, 409);
         return json(response, { request_id: requestId, status: 'settled', data: [{ b64_json: 'AQID' }] });
     }
+    if (url.pathname === '/azure/tts') {
+        if (JSON.parse(body).text === '重复') {
+            return json(response, { message: 'Duplicate request', code: 40901, originalRequestId: 'first-speech' }, 409);
+        }
+        response.setHeader('Content-Type', 'audio/wav');
+        return response.end(audio);
+    }
+    if (url.pathname === '/azure/stt') {
+        return json(response, { text: '你好', durationMilliseconds: 500, segments: [] });
+    }
     if (url.pathname === '/v1/audio/speech') {
         response.setHeader('Content-Type', 'audio/mpeg');
         return response.end(audio);
@@ -115,6 +125,29 @@ async function check(Adapter, base, file, namedFile) {
     const plain = await api.audioTranscribe({ file, response_format: 'text' });
     assert.equal(plain.text, '完整文本');
     assert.equal(plain.requestId, requestId);
+
+    const azure = await api.azureSpeech({ text: '你好', voiceName: 'zh-CN-XiaoxiaoNeural', format: 'wav' });
+    assert.deepEqual(Buffer.from(azure.audio), audio);
+    assert.equal(azure.contentType, 'audio/wav');
+    assert.equal(azure.chargedPoints, 25);
+    assert.equal(incoming.at(-1).path, '/azure/tts');
+    assert.equal(JSON.parse(incoming.at(-1).body).format, 'wav');
+    await assert.rejects(api.azureSpeech({
+        text: '重复', voiceName: 'zh-CN-XiaoxiaoNeural', idempotencyKey: 'same-azure-key',
+    }), { status: 409, code: 40901, originalRequestId: 'first-speech' });
+    assert.equal(incoming.at(-1).headers['idempotency-key'], 'same-azure-key');
+
+    const azureText = await api.azureTranscribe({
+        file, model: 'fast', detail: true, phraseList: ['API2D', 'Azure'], idempotencyKey: 'azure-stt',
+    });
+    assert.equal(azureText.text, '你好');
+    assert.equal(azureText.durationMilliseconds, 500);
+    assert.equal(azureText.requestId, requestId);
+    assert.equal(azureText.chargedPoints, 25);
+    assert.equal(incoming.at(-1).path, '/azure/stt');
+    assert.equal(incoming.at(-1).headers['idempotency-key'], 'azure-stt');
+    assert.match(incoming.at(-1).body, /name="phraseList"\r\n\r\n\["API2D","Azure"\]/);
+
 }
 
 (async () => {

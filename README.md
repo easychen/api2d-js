@@ -158,6 +158,30 @@ node examples/media.cjs speech speech.mp3
 
 [音频文档](https://api2d.com/doc/audio) · [图片文档](https://api2d.com/doc/images) · [Node 示例](examples/media.cjs)
 
+### Azure 语音
+
+`azureSpeech` 返回音频、内容类型、请求 ID 和扣点。`azureTranscribe` 支持浏览器文件和 Node.js 文件路径。省略 `model` 时识别 WAV 短句，`fast` 和 `llm` 支持整段转写。
+
+```js
+const speech = await api.azureSpeech({
+  text: '欢迎使用 API2D。',
+  voiceName: 'zh-CN-XiaoxiaoNeural',
+  format: 'wav',
+});
+
+const transcript = await api.azureTranscribe({
+  file: 'recording.wav', // 浏览器中传入 File
+  model: 'fast',
+});
+
+console.log(transcript.text, transcript.chargedPoints);
+```
+
+Node.js 也可运行 `node examples/media.cjs azure-speech` 或 `node examples/media.cjs azure-transcribe recording.wav`。
+
+可选 `idempotencyKey` 用来重试同一次请求。已受理的请求会返回 `409`，错误的 `originalRequestId` 标识原请求。[Azure 音频参数与限制](https://api2d.com/doc/audio#azure-speech)
+
+
 # 一个简单的纯浏览器 SDK for Api2d 和 OpenAI
 
 不知道为啥，找了半天没有找到纯 Browser 的 OpenAI SDK，都是 Node 实现的。于是自己写了一个，同时兼容 OpenAI 和 [API2d](https://api2d.com/) 的 key。

@@ -598,6 +598,16 @@ module.exports = class Api2d {
         return response.data;
     }
 
+    async azureSpeech(options) {
+        const media = await import('../media.mjs');
+        return media.azureSpeech(this, fetch, options);
+    }
+
+    async azureTranscribe(options) {
+        const media = await import('../media.mjs');
+        return media.azureTranscribe(this, sendAudioForm, nodeAudioForm, options);
+    }
+
     async imageGetOrder(requestId) {
         const media = await import('../media.mjs');
         return media.imageGetOrder(this, fetch, requestId);

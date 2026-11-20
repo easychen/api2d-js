@@ -43,7 +43,22 @@ async function main() {
         console.log('Request ID:', result.requestId, 'Charged points:', result.chargedPoints);
         return;
     }
-    throw new Error('Usage: node examples/media.cjs image | order ID | transcribe FILE | translate FILE | speech [OUTPUT]');
+    if (command === 'azure-speech') {
+        const result = await client.azureSpeech({
+            text: '欢迎使用 API2D。', voiceName: 'zh-CN-XiaoxiaoNeural', format: 'wav', idempotencyKey,
+        });
+        await writeFile(argument || 'azure-speech.wav', Buffer.from(result.audio));
+        console.log('Request ID:', result.requestId, 'Charged points:', result.chargedPoints);
+        return;
+    }
+
+    if (command === 'azure-transcribe' && argument) {
+        const result = await client.azureTranscribe({ file: argument, model: 'fast', idempotencyKey });
+        console.log(result);
+        return;
+    }
+
+    throw new Error('Usage: node examples/media.cjs image | order ID | transcribe FILE | translate FILE | speech [OUTPUT] | azure-speech [OUTPUT] | azure-transcribe FILE');
 }
 
 main().catch(error => {

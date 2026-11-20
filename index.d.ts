@@ -68,6 +68,8 @@ declare class Api2d {
 
   imageGenerate(options: ImageGenerateOptions): Promise<ImageGenerationResult>;
   imageGetOrder(requestId: string): Promise<ImageOrderResult>;
+  azureSpeech(options: AzureSpeechOptions): Promise<AudioSpeechResult>;
+  azureTranscribe(options: AzureTranscriptionOptions): Promise<AzureTranscriptionResult>;
   audioSpeech(options: AudioSpeechOptions): Promise<AudioSpeechResult>;
   audioTranscribe(options: AudioTranscriptionOptions): Promise<AudioTextResult>;
   audioTranslate(options: AudioTranslationOptions): Promise<AudioTextResult>;
@@ -157,6 +159,35 @@ export interface AudioTextResult {
   usage?: Record<string, unknown>;
   languages?: Array<Record<string, unknown>>;
   moderation?: Record<string, unknown>;
+}
+
+export interface AzureSpeechOptions extends AudioOptions {
+  text: string;
+  voiceName: string;
+  format?: 'mp3' | 'wav' | 'opus';
+  speed?: number;
+  style?: string;
+}
+
+export interface AzureTranscriptionOptions extends Pick<AudioUploadOptions, 'file' | 'filename' | 'idempotencyKey' | 'moderation' | 'moderation_stop'> {
+  model?: 'short' | 'fast' | 'llm';
+  language?: string;
+  detail?: boolean;
+  diarization?: boolean;
+  maxSpeakers?: number;
+  phraseList?: string[];
+}
+
+export interface AzureTranscriptionResult extends AudioTextResult {
+  durationMilliseconds?: number;
+  segments?: Array<{
+    text: string;
+    offsetMilliseconds: number;
+    durationMilliseconds: number;
+    speaker?: number;
+    locale?: string;
+    words?: Array<{ text: string; offsetMilliseconds: number; durationMilliseconds: number }>;
+  }>;
 }
 
 export default Api2d

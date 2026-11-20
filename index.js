@@ -572,6 +572,14 @@ export default class Api2d {
         return response.data;
     }
 
+    async azureSpeech(options) {
+        return media.azureSpeech(this, fetch, options);
+    }
+
+    async azureTranscribe(options) {
+        return media.azureTranscribe(this, fetch, browserAudioForm, options);
+    }
+
     async imageGetOrder(requestId) {
         return media.imageGetOrder(this, fetch, requestId);
     }

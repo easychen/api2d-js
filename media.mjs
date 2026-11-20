@@ -9,6 +9,7 @@ function apiError(status, body, requestId) {
     error.status = status;
     error.code = details?.code;
     error.requestId = body?.requestId || body?.request_id || details?.requestId || requestId;
+    if (body?.originalRequestId) error.originalRequestId = body.originalRequestId;
     error.body = body;
     return error;
 }
@@ -40,7 +41,8 @@ async function mediaRequest(client, send, path, init, consume) {
     try {
         const base = client.apiBaseUrl.replace(/\/+$/, '');
         const versionedBase = /\/v\d+$/.test(base) ? base : `${base}/v${client.apiVersion}`;
-        const response = await send(`${versionedBase}/${path}`, {
+        const target = path.startsWith('/') ? base.replace(/\/v\d+$/, '') + path : `${versionedBase}/${path}`;
+        const response = await send(target, {
             ...init, signal: controller.signal, redirect: 'error',
             headers: { ...client.authHeader, ...client.refHeader, ...init.headers },
         });
@@ -90,14 +92,42 @@ export function audioSpeech(client, send, options) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...idempotencyHeader(idempotencyKey) },
         body: JSON.stringify({ ...body, model }),
+    }, readSpeech);
+}
+
+async function readSpeech(response, requestId) {
+    if (!response.ok) throw await readError(response, requestId);
+    return {
+        audio: await response.arrayBuffer(),
+        contentType: response.headers.get('content-type') || 'application/octet-stream',
+        requestId,
+        chargedPoints: chargedPointsOf(response),
+    };
+}
+
+export function azureSpeech(client, send, options) {
+    client.api2dOnly();
+    const { idempotencyKey, ...body } = options;
+    return mediaRequest(client, send, '/azure/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...idempotencyHeader(idempotencyKey) },
+        body: JSON.stringify(body),
+    }, readSpeech);
+}
+
+export async function azureTranscribe(client, send, makeForm, options) {
+    client.api2dOnly();
+    const { file, filename, idempotencyKey, phraseList, ...body } = options;
+    const form = await makeForm(file, filename);
+    for (const [field, value] of Object.entries(body)) {
+        if (value !== undefined) form.set(field, String(value));
+    }
+    if (phraseList !== undefined) form.set('phraseList', JSON.stringify(phraseList));
+    return mediaRequest(client, send, '/azure/stt', {
+        method: 'POST', headers: idempotencyHeader(idempotencyKey), body: form,
     }, async (response, requestId) => {
         if (!response.ok) throw await readError(response, requestId);
-        return {
-            audio: await response.arrayBuffer(),
-            contentType: response.headers.get('content-type') || 'application/octet-stream',
-            requestId,
-            chargedPoints: chargedPointsOf(response),
-        };
+        return { ...await response.json(), requestId, chargedPoints: chargedPointsOf(response) };
     });
 }
 
