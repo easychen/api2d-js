@@ -4,6 +4,39 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
+async function nodeAudioForm(file, filename) {
+    const { FormData, File } = await import('formdata-node');
+    if (typeof file === 'string') {
+        const { fileFromPath } = await import('formdata-node/file-from-path');
+        file = await fileFromPath(file);
+    } else if (ArrayBuffer.isView(file) || file instanceof ArrayBuffer) {
+        if (!filename) throw new TypeError('Provide a filename with the audio extension');
+        file = new File([file], filename);
+    }
+    const name = filename || file?.name;
+    if (!name) throw new TypeError('Provide a filename with the audio extension');
+    const form = new FormData();
+    form.set('file', file, name);
+    return form;
+}
+
+async function sendAudioForm(url, options) {
+    const response = await axios.post(url, options.body, {
+        headers: options.headers, signal: options.signal, responseType: 'stream',
+        validateStatus: () => true, maxRedirects: 0,
+    });
+    const text = async () => {
+        const chunks = [];
+        for await (const chunk of response.data) chunks.push(Buffer.from(chunk));
+        return Buffer.concat(chunks).toString('utf8');
+    };
+    return {
+        status: response.status, ok: response.status >= 200 && response.status < 300, body: response.data,
+        headers: { get: name => response.headers[name.toLowerCase()] },
+        text, json: async () => JSON.parse(await text()),
+    };
+}
+
 module.exports = class Api2d {
     // 设置key和apiBaseUrl
     constructor(key = null, apiBaseUrl = null, timeout = 60000, version = '2023-07-01-preview', deployments = {
@@ -565,7 +598,31 @@ module.exports = class Api2d {
         return response.data;
     }
 
+    async imageGetOrder(requestId) {
+        const media = await import('../media.mjs');
+        return media.imageGetOrder(this, fetch, requestId);
+    }
+
+    async audioSpeech(options) {
+        const media = await import('../media.mjs');
+        return media.audioSpeech(this, fetch, options);
+    }
+
+    async audioTranscribe(options) {
+        const media = await import('../media.mjs');
+        return media.audioUpload(this, sendAudioForm, nodeAudioForm, 'transcriptions', options);
+    }
+
+    async audioTranslate(options) {
+        const media = await import('../media.mjs');
+        return media.audioUpload(this, sendAudioForm, nodeAudioForm, 'translations', options);
+    }
+
     async imageGenerate(options) {
+        if (this.by === 'api2d') {
+            const media = await import('../media.mjs');
+            return media.imageGenerate(this, fetch, options);
+        }
         let { model, prompt, n, size, response_format} = options;
         if( !n ) n = 1;
         if( !size ) size = '1024x1024';

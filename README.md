@@ -7,7 +7,7 @@ For some reason, I couldn't find a pure browser OpenAI SDK, they were all implem
 ## Change Log
 
 - 0.1.41 添加 onReasoning 方法，用于输出推理过程中的内容
-- 0.1.39 添加 imageGenerate 方法，用于调用 DALL 生成图片
+- 0.1.39 添加 imageGenerate 方法。
 
 - 0.1.37：Azure默认模型名称采用去掉小数点的版本
 
@@ -113,6 +113,55 @@ doit();
 ```
 
 [More examples](https://github.com/easychen/api2d-js/pull/3#issuecomment-1498753640)
+
+## API2D 图片和音频
+
+使用自己的 Forward Key。浏览器可以从用户输入获取密钥，Node 示例从 `API2D_FORWARD_KEY` 环境变量读取。一次调用只发送一次 HTTP 请求，重复生成前先检查 ID 和计费结果。
+
+```js
+import Api2d from 'api2d';
+
+const api = new Api2d(forwardKey, 'https://oa.api2d.net', 650_000);
+const imageRequestKey = crypto.randomUUID();
+const image = await api.imageGenerate({
+  model: 'gpt-image-2.6-sunburst',
+  prompt: '白色背景上的绿色陶瓷杯',
+  output_format: 'webp',
+  response_format: 'url',
+  idempotencyKey: imageRequestKey,
+});
+
+if (image.request_id) {
+  const order = await api.imageGetOrder(image.request_id);
+  console.log(order.status, order.data?.[0]?.url);
+}
+
+const transcript = await api.audioTranscribe({
+  file: document.querySelector('input[type=file]').files[0],
+  stream: true,
+  idempotencyKey: crypto.randomUUID(),
+  onDelta: delta => console.log(delta),
+});
+console.log(transcript.text, transcript.requestId, transcript.chargedPoints);
+```
+
+- `imageGenerate` 支持 Flare 和 Sunburst。SDK 默认返回 `url`，也可用 `b64_json` 在首次响应拿到 Base64。使用原幂等键和原参数重试图片请求，避免重复扣点。使用响应中的 `request_id` 查询原订单。签名下载链接有效 24 小时，最多 5 次整图下载尝试。
+- `audioTranscribe` 默认用 `gpt-transcribe`，流式上限 720 秒，非流式接收上限 600 秒。`audioTranslate` 默认用 `gpt-realtime-translate`，英文输出，流式 480 秒，非流式接收上限 300 秒。
+- 推荐 `stream: true`，默认使用 JSON 事件。应用以 `onDelta(delta, text)` 接收增量和累积文字，Promise 返回完整结果。开启已配置的腾讯云文本审核时，服务端返回 JSON。公网代理在非流式请求等待约 125 秒后可能超时。新版上传与响应大小各为 5,000,000 字节。
+- `audioSpeech({ input, voice, ... })` 默认用 `gpt-realtime-2.1-mini`，最多 500 个 UTF-16 代码单元。返回 `{ audio, contentType, requestId, chargedPoints }`，其中 `audio` 是 `ArrayBuffer`。
+- 将 `requestId` 交给客服排查。音频相同幂等键再次提交会收到 409，已经发起上游后中断会保留预扣。音频 HTTP 或 SSE 错误可通过异常的 `status`、`code` 和 `requestId` 排查。
+
+Node 示例支持文件路径，浏览器可传 `File` 或附带 `filename` 的 `Blob`。运行以下示例时，先在环境中设置自己的 `API2D_FORWARD_KEY`。需要重试同一次图片生成时，将原幂等键设置为 `API2D_REQUEST_KEY`。
+
+```bash
+node examples/media.cjs image
+node examples/media.cjs order YOUR_REQUEST_ID
+node examples/media.cjs transcribe recording.mp3
+node examples/media.cjs translate recording.mp3
+node examples/media.cjs speech speech.mp3
+```
+
+[音频文档](https://api2d.com/doc/audio) · [图片文档](https://api2d.com/doc/images) · [Node 示例](examples/media.cjs)
 
 # 一个简单的纯浏览器 SDK for Api2d 和 OpenAI
 
