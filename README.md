@@ -122,13 +122,13 @@ doit();
 import Api2d from 'api2d';
 
 const api = new Api2d(forwardKey, 'https://oa.api2d.net', 650_000);
-const imageRequestKey = crypto.randomUUID();
+const imageClientRequestId = crypto.randomUUID();
 const image = await api.imageGenerate({
   model: 'gpt-image-2.6-sunburst',
   prompt: '白色背景上的绿色陶瓷杯',
   output_format: 'webp',
   response_format: 'url',
-  idempotencyKey: imageRequestKey,
+  idempotencyKey: imageClientRequestId,
 });
 
 if (image.request_id) {
@@ -145,13 +145,13 @@ const transcript = await api.audioTranscribe({
 console.log(transcript.text, transcript.requestId, transcript.chargedPoints);
 ```
 
-- `imageGenerate` 支持 Flare 和 Sunburst。SDK 默认返回 `url`，也可用 `b64_json` 在首次响应拿到 Base64。使用原幂等键和原参数重试图片请求，避免重复扣点。使用响应中的 `request_id` 查询原订单。签名下载链接有效 24 小时，最多 5 次整图下载尝试。
+- `imageGenerate` 支持 Flare 和 Sunburst。SDK 默认返回 `url`，也可用 `b64_json` 在首次响应拿到 Base64。通过 `idempotencyKey` 传入自己生成的客户端请求编号。用原编号和原参数重试图片请求，避免重复生成和扣点。用响应中的 `request_id` 查询原订单。签名下载链接有效 24 小时，最多 5 次整图下载尝试。
 - `audioTranscribe` 默认用 `gpt-transcribe`，流式上限 720 秒，非流式接收上限 600 秒。`audioTranslate` 默认用 `gpt-realtime-translate`，英文输出，流式 480 秒，非流式接收上限 300 秒。
 - 推荐 `stream: true`，默认使用 JSON 事件。应用以 `onDelta(delta, text)` 接收增量和累积文字，Promise 返回完整结果。开启已配置的腾讯云文本审核时，服务端返回 JSON。公网代理在非流式请求等待约 125 秒后可能超时。新版上传与响应大小各为 5,000,000 字节。
 - `audioSpeech({ input, voice, ... })` 默认用 `gpt-realtime-2.1-mini`，最多 500 个 UTF-16 代码单元。返回 `{ audio, contentType, requestId, chargedPoints }`，其中 `audio` 是 `ArrayBuffer`。
-- 将 `requestId` 交给客服排查。音频相同幂等键再次提交会收到 409，已经发起上游后中断会保留预扣。音频 HTTP 或 SSE 错误可通过异常的 `status`、`code` 和 `requestId` 排查。
+- 客户端超时后，自动重试有可能把服务端已受理的请求再发一次。通过可选的 `idempotencyKey` 传入首次请求的编号，可以防止再次生成和扣点。音频返回 `409` 表示此次重复提交已被拦住，原结果仅随当次响应交付。确实想重新生成时，换一个新编号或省略此选项，新请求会单独计费。音频 HTTP 或 SSE 错误可通过异常的 `status`、`code` 和 `requestId` 排查。
 
-Node 示例支持文件路径，浏览器可传 `File` 或附带 `filename` 的 `Blob`。运行以下示例时，先在环境中设置自己的 `API2D_FORWARD_KEY`。需要重试同一次图片生成时，将原幂等键设置为 `API2D_REQUEST_KEY`。
+Node 示例支持文件路径，浏览器可传 `File` 或附带 `filename` 的 `Blob`。运行以下示例时，先在环境中设置自己的 `API2D_FORWARD_KEY`。需要重试同一次图片生成时，将原客户端请求编号设置为 `API2D_REQUEST_KEY`。
 
 ```bash
 node examples/media.cjs image

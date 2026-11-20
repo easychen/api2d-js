@@ -85,6 +85,7 @@ export interface ImageGenerateOptions {
   response_format?: 'url' | 'b64_json';
   background?: 'auto' | 'opaque' | 'transparent';
   moderation?: 'auto';
+  /** Optional client request number. Supply a new value for each new request. */
   idempotencyKey?: string;
   imageModeration?: 'strict';
 }
@@ -105,6 +106,7 @@ export interface ImageGenerationResult {
 }
 
 interface AudioOptions {
+  /** Optional client request number. Supply a new value for each new request. */
   idempotencyKey?: string;
   moderation?: boolean;
   moderation_stop?: 'stop';
