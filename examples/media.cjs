@@ -1,5 +1,4 @@
 const Api2d = require('../cjs');
-const { randomUUID } = require('node:crypto');
 const { writeFile } = require('node:fs/promises');
 
 async function main() {
@@ -7,7 +6,7 @@ async function main() {
     if (!key) throw new Error('Set API2D_FORWARD_KEY in your environment');
     const client = new Api2d(key, 'https://oa.api2d.net', 650000);
     const [command, argument] = process.argv.slice(2);
-    const idempotencyKey = process.env.API2D_REQUEST_KEY || randomUUID();
+    const idempotencyKey = process.env.API2D_REQUEST_KEY;
 
     if (command === 'image') {
         const result = await client.imageGenerate({

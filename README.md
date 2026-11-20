@@ -122,13 +122,8 @@ doit();
 import Api2d from 'api2d';
 
 const api = new Api2d(forwardKey, 'https://oa.api2d.net', 650_000);
-const imageClientRequestId = crypto.randomUUID();
 const image = await api.imageGenerate({
-  model: 'gpt-image-2.6-sunburst',
   prompt: '白色背景上的绿色陶瓷杯',
-  output_format: 'webp',
-  response_format: 'url',
-  idempotencyKey: imageClientRequestId,
 });
 
 if (image.request_id) {
@@ -139,20 +134,19 @@ if (image.request_id) {
 const transcript = await api.audioTranscribe({
   file: document.querySelector('input[type=file]').files[0],
   stream: true,
-  idempotencyKey: crypto.randomUUID(),
   onDelta: delta => console.log(delta),
 });
 console.log(transcript.text, transcript.requestId, transcript.chargedPoints);
 ```
 
-- `imageGenerate` 支持 Flare 和 Sunburst。SDK 默认返回 `url`，也可用 `b64_json` 在首次响应拿到 Base64。通过 `idempotencyKey` 传入自己生成的客户端请求编号。用原编号和原参数重试图片请求，避免重复生成和扣点。用响应中的 `request_id` 查询原订单。签名下载链接有效 24 小时，最多 5 次整图下载尝试。
+- `imageGenerate` 支持 Flare 和 Sunburst。SDK 默认返回 `url`，也可用 `b64_json` 在首次响应拿到 Base64。用响应中的 `request_id` 查询原订单。签名下载链接有效 24 小时，最多 5 次整图下载尝试。
 - `audioTranscribe` 默认用 `gpt-transcribe`，流式上限 720 秒，非流式接收上限 600 秒。`audioTranslate` 默认用 `gpt-realtime-translate`，英文输出，流式 480 秒，非流式接收上限 300 秒。
 - 推荐 `stream: true`，默认使用 JSON 事件。应用以 `onDelta(delta, text)` 接收增量和累积文字，Promise 返回完整结果。开启已配置的腾讯云文本审核时，服务端返回 JSON。公网代理在非流式请求等待约 125 秒后可能超时。新版上传与响应大小各为 5,000,000 字节。
 - `audioSpeech({ input, voice, ... })` 默认用 `gpt-realtime-2.1-mini`，最多 500 个 UTF-16 代码单元。返回 `{ audio, contentType, requestId, chargedPoints }`，其中 `audio` 是 `ArrayBuffer`。
 
 音频 HTTP 或 SSE 错误可通过异常的 `status`、`code` 和 `requestId` 排查。
 
-Node 示例支持文件路径，浏览器可传 `File` 或附带 `filename` 的 `Blob`。运行以下示例时，先在环境中设置自己的 `API2D_FORWARD_KEY`。需要重试同一次图片生成时，将原客户端请求编号设置为 `API2D_REQUEST_KEY`。
+Node 示例支持文件路径，浏览器可传 `File` 或附带 `filename` 的 `Blob`。运行以下示例时，先在环境中设置自己的 `API2D_FORWARD_KEY`。
 
 ```bash
 node examples/media.cjs image
@@ -446,6 +440,24 @@ api.abort(); // 主动取消请求
 ## 避免重复提交（可选）
 
 `idempotencyKey` 是可选项。客户端超时或断线后，服务端可能已开始处理，程序自动重发会有重复生成和扣点的风险。想防止这种情况，可以在首次发送前保存自己生成的客户端请求编号。同一次请求重试时，使用同一个 Forward Key，把原编号传给 `idempotencyKey`。
+
+首次调用前生成并保存编号。需要重试同一次请求时，沿用 `clientRequestId`，并传入相同参数。
+
+```js
+const clientRequestId = crypto.randomUUID();
+
+await api.imageGenerate({
+  prompt: '白色背景上的绿色陶瓷杯',
+  idempotencyKey: clientRequestId,
+});
+```
+
+Node 示例也接受这个编号。首次执行第一行，重试时只重跑第二行。
+
+```bash
+API2D_REQUEST_KEY=$(uuidgen)
+API2D_REQUEST_KEY="$API2D_REQUEST_KEY" node examples/media.cjs image
+```
 
 - **图片生成**用原编号和相同参数重试可查看原请求状态或取回仍有效的图片链接。
 - **音频处理**使用已受理的编号会收到 `409`，表示这次没有再次生成或扣点。音频文件、转录和译文只随原请求的响应交付。
