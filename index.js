@@ -1,4 +1,14 @@
 import {fetchEventSource} from '@microsoft/fetch-event-source';
+import * as media from './media.mjs';
+
+function browserAudioForm(file, filename) {
+    if (!(file instanceof Blob)) throw new TypeError('Audio file must be a File or Blob');
+    const name = filename || file.name;
+    if (!name) throw new TypeError('Provide a filename with the audio extension');
+    const form = new FormData();
+    form.set('file', file, name);
+    return form;
+}
 
 export default class Api2d {
     // 设置key和apiBaseUrl
@@ -562,7 +572,32 @@ export default class Api2d {
         return response.data;
     }
 
+    async azureSpeech(options) {
+        return media.azureSpeech(this, fetch, options);
+    }
+
+    async azureTranscribe(options) {
+        return media.azureTranscribe(this, fetch, browserAudioForm, options);
+    }
+
+    async imageGetOrder(requestId) {
+        return media.imageGetOrder(this, fetch, requestId);
+    }
+
+    async audioSpeech(options) {
+        return media.audioSpeech(this, fetch, options);
+    }
+
+    async audioTranscribe(options) {
+        return media.audioUpload(this, fetch, browserAudioForm, 'transcriptions', options);
+    }
+
+    async audioTranslate(options) {
+        return media.audioUpload(this, fetch, browserAudioForm, 'translations', options);
+    }
+
     async imageGenerate(options) {
+        if (this.by === 'api2d') return media.imageGenerate(this, fetch, options);
         let { model, prompt, n, size, response_format} = options;
         if( !n ) n = 1;
         if( !size ) size = '1024x1024';
