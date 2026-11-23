@@ -140,7 +140,7 @@ console.log(transcript.text, transcript.requestId, transcript.chargedPoints);
 ```
 
 - `imageGenerate` 支持 Flare 和 Sunburst。SDK 默认返回 `url`，也可用 `b64_json` 在首次响应拿到 Base64。用响应中的 `request_id` 查询原订单。签名下载链接有效 24 小时，最多 5 次整图下载尝试。
-- `audioTranscribe` 默认用 `gpt-transcribe`，流式上限 720 秒，非流式接收上限 600 秒。`audioTranslate` 默认用 `gpt-realtime-translate`，英文输出，流式 480 秒，非流式接收上限 300 秒。
+- `audioTranscribe` 默认用 `gpt-transcribe`，流式上限 720 秒，非流式接收上限 600 秒。`audioTranslate` 默认用 `gpt-realtime-translate`，可用 `target_language` 指定译文语言（例如 `zh` 中文、`ja` 日语，默认 `en` 英文），流式 480 秒，非流式接收上限 300 秒。
 - 推荐 `stream: true`，默认使用 JSON 事件。应用以 `onDelta(delta, text)` 接收增量和累积文字，Promise 返回完整结果。开启已配置的腾讯云文本审核时，服务端返回 JSON。公网代理在非流式请求等待约 125 秒后可能超时。新版上传与响应大小各为 5,000,000 字节。
 - `audioSpeech({ input, voice, ... })` 默认用 `gpt-realtime-2.1-mini`，最多 500 个 UTF-16 代码单元。返回 `{ audio, contentType, requestId, chargedPoints }`，其中 `audio` 是 `ArrayBuffer`。
 
@@ -152,7 +152,7 @@ Node 示例支持文件路径，浏览器可传 `File` 或附带 `filename` 的 
 node examples/media.cjs image
 node examples/media.cjs order YOUR_REQUEST_ID
 node examples/media.cjs transcribe recording.mp3
-node examples/media.cjs translate recording.mp3
+node examples/media.cjs translate recording.mp3 zh
 node examples/media.cjs speech speech.mp3
 ```
 

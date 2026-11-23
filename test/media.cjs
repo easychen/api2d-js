@@ -115,8 +115,9 @@ async function check(Adapter, base, file, namedFile) {
     assert.match(upload.body, /filename="[^"]+\.wav"/);
     assert.ok(!upload.body.includes('onDelta'));
 
-    assert.equal((await api.audioTranslate({ file, stream: true })).type, 'translation.text.done');
+    assert.equal((await api.audioTranslate({ file, stream: true, target_language: 'zh' })).type, 'translation.text.done');
     assert.match(incoming.at(-1).body, /name="model"\r\n\r\ngpt-realtime-translate/);
+    assert.match(incoming.at(-1).body, /name="target_language"\r\n\r\nzh/);
     await assert.rejects(api.audioTranslate({ ...namedFile('error.wav'), stream: true }), { status: 502, code: 50003, requestId });
     await assert.rejects(api.audioTranslate({ ...namedFile('incomplete.wav'), stream: true }), { status: 502, requestId });
     const audited = await api.audioTranslate({ file, stream: true, moderation: true, onDelta: () => assert.fail('Expected ordinary JSON') });
