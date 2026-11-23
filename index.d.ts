@@ -148,6 +148,7 @@ export interface AudioTranscriptionOptions extends AudioUploadOptions {
 }
 
 export interface AudioTranslationOptions extends AudioUploadOptions {
+  target_language?: 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'ja' | 'ru' | 'de' | 'ko' | 'hi' | 'id' | 'vi' | 'it';
   model?: string;
 }
 

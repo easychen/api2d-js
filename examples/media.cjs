@@ -5,7 +5,7 @@ async function main() {
     const key = process.env.API2D_FORWARD_KEY;
     if (!key) throw new Error('Set API2D_FORWARD_KEY in your environment');
     const client = new Api2d(key, 'https://oa.api2d.net', 650000);
-    const [command, argument] = process.argv.slice(2);
+    const [command, argument, targetLanguage] = process.argv.slice(2);
     const idempotencyKey = process.env.API2D_REQUEST_KEY;
 
     if (command === 'image') {
@@ -30,7 +30,7 @@ async function main() {
         };
         const result = command === 'transcribe'
             ? await client.audioTranscribe(options)
-            : await client.audioTranslate(options);
+            : await client.audioTranslate({ ...options, target_language: targetLanguage });
         console.log('\nRequest ID:', result.requestId, 'Charged points:', result.chargedPoints);
         return;
     }
@@ -58,7 +58,7 @@ async function main() {
         return;
     }
 
-    throw new Error('Usage: node examples/media.cjs image | order ID | transcribe FILE | translate FILE | speech [OUTPUT] | azure-speech [OUTPUT] | azure-transcribe FILE');
+    throw new Error('Usage: node examples/media.cjs image | order ID | transcribe FILE | translate FILE [TARGET_LANGUAGE] | speech [OUTPUT] | azure-speech [OUTPUT] | azure-transcribe FILE');
 }
 
 main().catch(error => {
